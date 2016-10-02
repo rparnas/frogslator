@@ -68,6 +68,9 @@
     <Compile Include="Program.cs" />
     <Compile Include="SpecialChar.cs" />
     <Compile Include="State.cs" />
+    <EmbeddedResource Include="DialogEditor.resx">
+      <DependentUpon>DialogEditor.cs</DependentUpon>
+    </EmbeddedResource>
     <EmbeddedResource Include="Properties\Resources.resx">
       <Generator>ResXFileCodeGenerator</Generator>
       <LastGenOutput>Resources.Designer.cs</LastGenOutput>
