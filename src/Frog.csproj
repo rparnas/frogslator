@@ -49,15 +49,21 @@
     <Compile Include="DialogEditor.cs">
       <SubType>Form</SubType>
     </Compile>
-    <Compile Include="DialogEditor.Designer.cs" />
+    <Compile Include="DialogEditor.Designer.cs">
+      <DependentUpon>DialogEditor.cs</DependentUpon>
+    </Compile>
     <Compile Include="EditJumboForm.cs">
       <SubType>Form</SubType>
     </Compile>
-    <Compile Include="EditJumboForm.Designer.cs" />
+    <Compile Include="EditJumboForm.Designer.cs">
+      <DependentUpon>EditJumboForm.cs</DependentUpon>
+    </Compile>
     <Compile Include="GraphicsControl.cs">
       <SubType>UserControl</SubType>
     </Compile>
-    <Compile Include="GraphicsControl.Designer.cs" />
+    <Compile Include="GraphicsControl.Designer.cs">
+      <DependentUpon>GraphicsControl.cs</DependentUpon>
+    </Compile>
     <Compile Include="Line.cs" />
     <Compile Include="Program.cs" />
     <Compile Include="SpecialChar.cs" />
