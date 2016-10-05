@@ -54,7 +54,7 @@ namespace Frog
     {
       get
       {
-        return new DirectoryInfo(ExecutableDirectory + "..\\..\\..\\resources\\").FullName;
+        return new DirectoryInfo(ExecutableDirectory + "\\resources\\").FullName;
       }
     }
 
