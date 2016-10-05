@@ -1,4 +1,4 @@
-namespace Frog
+namespace Frogslator
 {
     partial class EditJumboForm
     {

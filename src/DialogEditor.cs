@@ -9,7 +9,7 @@ using System.Windows.Forms;
 using System.IO;
 using System.Reflection;
 
-namespace Frog
+namespace Frogslator
 {
     public partial class DialogEditor : Form
     {
