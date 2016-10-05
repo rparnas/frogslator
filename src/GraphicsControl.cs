@@ -8,7 +8,7 @@ using System.Text;
 using System.Windows.Forms;
 using System.IO;
 
-namespace Frog
+namespace Frogslator
 {
     public partial class GraphicsControl : UserControl
     {

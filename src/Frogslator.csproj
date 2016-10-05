@@ -7,8 +7,8 @@
     <ProjectGuid>{92A438E7-21FF-4479-A7CE-D46C96C1299A}</ProjectGuid>
     <OutputType>WinExe</OutputType>
     <AppDesignerFolder>Properties</AppDesignerFolder>
-    <RootNamespace>Frog</RootNamespace>
-    <AssemblyName>Frog</AssemblyName>
+    <RootNamespace>Frogslator</RootNamespace>
+    <AssemblyName>Frogslator</AssemblyName>
     <TargetFrameworkVersion>v4.6.1</TargetFrameworkVersion>
     <FileAlignment>512</FileAlignment>
     <AutoGenerateBindingRedirects>true</AutoGenerateBindingRedirects>

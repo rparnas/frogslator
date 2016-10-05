@@ -1,4 +1,4 @@
-namespace Frog
+namespace Frogslator
 {
     partial class DialogEditor
     {
@@ -57,7 +57,7 @@ namespace Frog
       this.lbl_Prev = new System.Windows.Forms.Label();
       this.btn_PreviewDown = new System.Windows.Forms.Button();
       this.btn_PreviewUp = new System.Windows.Forms.Button();
-      this.graphicsControl1 = new Frog.GraphicsControl();
+      this.graphicsControl1 = new Frogslator.GraphicsControl();
       this.tb_TextToInsert = new System.Windows.Forms.TextBox();
       this.lb_SpecialChars = new System.Windows.Forms.ListBox();
       this.tb_Dialog = new System.Windows.Forms.TextBox();
@@ -72,8 +72,8 @@ namespace Frog
       this.tb_Naming = new System.Windows.Forms.TextBox();
       this.textBox1 = new System.Windows.Forms.TextBox();
       this.label3 = new System.Windows.Forms.Label();
-      this.gc_SaveScreen_Top = new Frog.GraphicsControl();
-      this.gc_NameScreen = new Frog.GraphicsControl();
+      this.gc_SaveScreen_Top = new Frogslator.GraphicsControl();
+      this.gc_NameScreen = new Frogslator.GraphicsControl();
       this.tabPage3 = new System.Windows.Forms.TabPage();
       this.textBox5 = new System.Windows.Forms.TextBox();
       this.textBox4 = new System.Windows.Forms.TextBox();
@@ -81,9 +81,9 @@ namespace Frog
       this.tb_Open3 = new System.Windows.Forms.TextBox();
       this.tb_Open2 = new System.Windows.Forms.TextBox();
       this.tb_Open1 = new System.Windows.Forms.TextBox();
-      this.gc_Open3 = new Frog.GraphicsControl();
-      this.gc_Open2 = new Frog.GraphicsControl();
-      this.gc_Open1 = new Frog.GraphicsControl();
+      this.gc_Open3 = new Frogslator.GraphicsControl();
+      this.gc_Open2 = new Frogslator.GraphicsControl();
+      this.gc_Open1 = new Frogslator.GraphicsControl();
       this.tabPage4 = new System.Windows.Forms.TabPage();
       this.label6 = new System.Windows.Forms.Label();
       this.label5 = new System.Windows.Forms.Label();
@@ -93,10 +93,10 @@ namespace Frog
       this.textBox6 = new System.Windows.Forms.TextBox();
       this.tb_Open5 = new System.Windows.Forms.TextBox();
       this.tb_Open4 = new System.Windows.Forms.TextBox();
-      this.gc_Continue = new Frog.GraphicsControl();
-      this.gc_Start = new Frog.GraphicsControl();
-      this.gc_Open5 = new Frog.GraphicsControl();
-      this.gc_Open4 = new Frog.GraphicsControl();
+      this.gc_Continue = new Frogslator.GraphicsControl();
+      this.gc_Start = new Frogslator.GraphicsControl();
+      this.gc_Open5 = new Frogslator.GraphicsControl();
+      this.gc_Open4 = new Frogslator.GraphicsControl();
       this.tabPage5 = new System.Windows.Forms.TabPage();
       this.label18 = new System.Windows.Forms.Label();
       this.tb_Diary_0xE210 = new System.Windows.Forms.TextBox();
