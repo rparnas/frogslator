@@ -1,63 +1,75 @@
 # Kaeru no Tame ni Kane wa Naru Technical Notes
 
-## Opening `0xB629 – 0xB7A8`
+## Opening (`0xB629` – `0xB7B4`)
 
-__Text Table `0xB629 – 0xB6B8`:__
-A table of 72, 2 byte entries. Each entry points to a font tile. The address of the font tile pointed to is equal to `[2-Byte Entry] + 0x50000`
+From `0xB629` – `0xB6B8` is a table of 72 2-byte entries. Each entry points to the tile at `[2-byte entry] + 0x50000`. 
 
-__Text (0xB6B9 – 0xB7B2):__
-Bytes refer to indexes in the above Text Table. The entry in the text table pointed to is equal to `([Byte Value]*2 - 0x30) + 0xB629`
+Bytes on the opening screen refer the above table. The table index referred to by a byte is `([byte] * 2) - 0x30 + 0xB629`. However, the value `0xBF` indicates a space rather than a table index.
 
-Each paragraph is made up of three lines of 16 bytes each  This is followed by the New Game and Continue options.
+Each paragraph in the opening crawl has three physical lines of 16 bytes. This is followed by the Start and Continue buttons.
 
 * Paragraph 1
-  * Line 01: 0xB6B9 – 0xB6C8: むか～し　むかし
-  * Line 02: 0xB6C9 – 0xB6D8	: 大変　なかのよい　２つの国に
-  * Line 03: 0xB6D9 – 0xB6E8	: ２人の　王子セマが　おりました。
+  * `0xB6B9` – `0xB6C8`  –  むか～し　むかし
+  * `0xB6C9` – `0xB6D8`  –  大変　なかのよい　２つの国に
+  * `0xB6D9` – `0xB6E8`  – ２人の　王子セマが　おりました。
 * Paragraph 2
-  * Line 04: 0xB6E9 – 0xB6F8: [Blank]
-  * Line 05: 0xB6F9 – 0xB708: １人は　チャッカリものの
-  * Line 06: 0xB709 – 0xB718: カスターど王国の　　王子セマ。
+  * `0xB6E9` – `0xB6F8` – 
+  * `0xB6F9` – `0xB708` – １人は　チャッカリものの
+  * `0xB709` – `0xB718` –  カスターど王国の　　王子セマ。
 * Paragraph 3
-  * Line 07: 0xB719 – 0xB728: [Blank]
-  * Line 08: 0xB729 – 0xB738: もう１ひとは　あわてんぼうの
-  * Line 09: 0xB739 – 0xB748: サブレ王国の　  王子サマ。
+  * `0xB719` – `0xB728`  – 
+  * `0xB729` – `0xB738`  –  もう１ひとは　あわてんぼうの
+  * `0xB739` – `0xB748`  –  サブレ王国の　  王子サマ。
 * Paragraph 4
-  * Line 10: 0xB749 – 0xB758: ２人は　小さなころから　
-  * Line 11: 0xB759 – 0xB768: ナニをやっても　ライバルでした。
-  * Line 12: 0xB769 – 0xB778: [Blank]
+  * `0xB749` – `0xB758`  – ２人は　小さなころから　
+  * `0xB759` – `0xB768`  –  ナニをやっても　ライバルでした。
+  * `0xB769` – `0xB778`  – 
 * Paragraph 5
-  * Line 13: 0xB779 – 0xB788: これは　そんな
-  * Line 14: 0xB789 – 0xB798: ２ひとの　王子サマの
-  * Line 15: 0xB799 – 0xB7A8: ぼうけんの　ものがたり　です。
-* Options
-  * Start: 0xB7A9 – 0xB7AD: はじめから
-  * Continue: 0xB7AE – 0xB7B2: つづき
+  * `0xB779` – `0xB788`  –  これは　そんな
+  * `0xB789` – `0xB798`  –  ２ひとの　王子サマの
+  * `0xB799` – `0xB7A8`  –  ぼうけんの　ものがたり　です。
+* Start Button 
+  * `0xB7A9` – `0xB7AD`  –  はじめから
+* Continue Button
+  * `0xB7AE` – `0xB7B4`  –  つづき　　
 
-## Diary / Save Screen
-0xE210: 日記ちょう
-0xE22E:  王子
-0xE234: 日記ちょう
-0xE242: どの日記で
-0xE24E: はじめますか？
-0xE27A: どの日記を
-0xE288: けしますか？
-0xE2B0: どうしますか？
-0xE304: どのぺーじからよみますか？
-0xE33E: どの日記に
-0xE34C: きろくする？
-0xE374: きろくしました
-0xE390: たびを
-0xE39E: つづけますか？
-0xE3AE: 日記けす
-0xE3BC: もどる
-0xE3CA: 日記つける
-0xE3E6: 日記たる
-0xE402: YES
-0xE41E: NO
-0xE43A: OOOO王子
-0xE456: OOOO王子
-0xE478: 日め
+## Name Entry (`0x4F534` – `0x4F69B`)
+
+The name entry screen includes the naming prompt, graphics and options for naming the player character. It is `0x12` rows with `0x14` bytes each. These bytes refer to tiles loaded in memory at Char Base `0x8800`, Tile `0x192`. 
+
+Prompt
+
+- `0x4F535` – `0x4F546` – あなたの　なまえを　かきこんで下さい
+
+## Diary
+
+Each character on the graphics screen is specified by two bytes. The first byte is always 0x00. The lines seem delimited with 0xFF, putting in longer phrases than intended seems to cause extra letters to be ignored.
+
+* `0xE210` – `0xE219` – 日記ちょう (header, diary from title screen)
+
+* `0xE22E`  – `0xE231` – 王子 (header, diary in-game)
+* `0xE234` – `0xE23D` – 日記ちょう (header, diary in-game)
+* `0xE242` – `0xE24B` – どの日記で (left page, 1st line, diary from title screen)
+* `0xE24E` – `0xE25B` – はじめますか？(left page, 2nd line, diary from title screen)
+* `0xE25C` – 
+* `0xE27A` – `0xE283` どの日記を (left page, 1st line, erase diary from title screen)
+* `0xE288` – `0xE295` けしますか？ (left page, 2nd line, erase diary from title screen)
+* `0xE2B0` – どうしますか？
+* `0xE304` – どのぺーじからよみますか？
+* `0xE33E` – どの日記に
+* `0xE34C` – きろくする？
+* `0xE374` – きろくしました
+* `0xE390` – たびを
+* `0xE39E` – つづけますか？
+* `0xE3AE` – 日記けす
+* `0xE3BC` – もどる
+* `0xE3CA` – 日記つける
+* `0xE3E6` – 日記たる
+* `0xE402` – YES
+* `0xE41E` – NO
+* `0xE43A` – `0xE435` – ----王子 (right page, diary from title screen)
+* `0xE456` – `0xE461` – ----王子 (right page, diary from title screen)
+* `0xE478` – `0xE47B` 日め (right page, diary from title screen)
 
 
 ## Dialog Address Table
@@ -86,466 +98,178 @@ Although 2331 line addresses are stored, only 1348 lines exist in the game as ma
 1959 – 2048
 2129 – 2304
 
-## Name Screen
-The name screen background includes the text "あなたの　なまえを　かきこんで下さい" and the decorative border. Each of the 0x12 rows have 0x14 bytes that specify the tiles to be drawn. The tile drawn is located at `[Byte Value] - 0x20 + 0x50500`.
-
-## Diary Screen
-Each byte of the diary screen refers to a tile which can be viewed with the GB Tile Viewer in Visual Boy Advance. 
-
-## Graphics (Font)
-All font graphics are in a standard Gameboy format. They can be viewed and modified with Tile Layer Pro. Most characters use a single 0x10 byte tile. Jumbo characters, located at the end of this region, are made up of four 0x10 byte tiles.
-
 ## Dialog Blocks
-Dialog is stored in four blocks offset by 0x4000 bytes each (0x70000, 0x74000, 0x78000, 0x7C0000). Any extra space at the end of a block is filled with 0xFF, the terminator byte.
+Dialog is stored in four blocks offset by `0x4000` bytes each (`0x70000`, `0x74000`, `0x78000`, `0x7C0000`). Extra space at the end of a block padded with `0xFF`. 
 
-Every line is in the following format, with the first line starting at 0x70000. 0xF1 to 0xFF are control bytes.
+Dialog consists of lines (which may contain multiple physical lines of text). Every line is in the following format, with the first line starting at `0x70000`. `0xF1` to `0xFF` are control codes.
 
-### Header Byte 1 ###
-The first byte of a line. Controls window position or shape. No changes needed for translation and exact byte meaning was not investigated in detail:
-* 0x00
-* 0x01
-* 0x02
-* 0x03
-* 0x04
-* 0x09
-* 0x12
-* 0x69
-* 0x87
-* 0xF1
-* 0xF4
-* 0xFE
+Lines are delimited with `0xFF`.
 
+Font graphics are in a standard Gameboy format. They can be viewed and modified with Tile Layer Pro. Most characters use a single `0x10` byte tile. Jumbo characters, located at the end of this region, are made up of four tiles.
 
-### Header Byte 2 ###
-The second byte of a line. Controls window position or shape. No changes needed for translation and exact byte meaning was not investigated in detail.
-* 0x00
-* 0x01
-* 0x03
-* 0x10
-* 0x18
-* 0x23
-* 0x29
-* 0x55
-* 0x69
-* 0x98
-* 0xA2
-* 0xA8
-* 0xCA
-* 0xFD
+### Header
+The first two bytes of a line. At least controls window position (top, middle,
+or bottom) and shape (plain white box or dialog cloud). The exact features have
+not been investigated in detail. The pairs used in the game are:
 
-### Regular Mode ###
-A line always starts in this mode at the third byte (after the two header bytes). Unless a control byte is encountered, the font tile at `0x50000 * 0x10 * [byte value]` is displayed. The character in each tile in the Japanese version of the game is displayed below.
-* 0x00: あ
-* 0x01: い
-* 0x02: う
-* 0x03: え
-* 0x04: お
-* 0x05: か
-* 0x06: き
-* 0x07: く
-* 0x08: け
-* 0x09: こ
-* 0x0A: さ
-* 0x0B: し
-* 0x0C: す
-* 0x0D: せ
-* 0x0E: そ
-* 0x0F: た
-* 0x10: ち
-* 0x11: つ
-* 0x12: て
-* 0x13: と
-* 0x14: な
-* 0x15: に
-* 0x16: ぬ
-* 0x17: ね
-* 0x18: の
-* 0x19: は
-* 0x1A: ひ
-* 0x1B: ふ
-* 0x1C: へ
-* 0x1D: ほ
-* 0x1E: ま
-* 0x1F: み
-* 0x20: む
-* 0x21: め
-* 0x22: も
-* 0x23: や
-* 0x24: ゆ
-* 0x25: よ
-* 0x26: ら
-* 0x27: り
-* 0x28: る
-* 0x29: れ
-* 0x2A: ろ
-* 0x2B: わ
-* 0x2C: を
-* 0x2D: ん
-* 0x2E: ぁ
-* 0x2F: ぃ
-* 0x30: ぅ
-* 0x31: ぇ
-* 0x32: ぉ
-* 0x33: ゃ
-* 0x34: ゅ
-* 0x35: ょ
-* 0x36: っ
-* 0x37: が
-* 0x38: ぎ
-* 0x39: ぐ
-* 0x3A: げ
-* 0x3B: ご
-* 0x3C: ざ
-* 0x3D: じ
-* 0x3E: ず
-* 0x3F: ぜ
-* 0x40: ぞ
-* 0x41: だ
-* 0x42: ぢ
-* 0x43: づ
-* 0x44: で
-* 0x45: ど
-* 0x46: ば
-* 0x47: び
-* 0x48: ぶ
-* 0x49: べ
-* 0x4A: ぼ
-* 0x4B: ぱ
-* 0x4C: ぴ
-* 0x4D: ぷ
-* 0x4E: ぺ
-* 0x4F: ぽ
-* 0x50: ア
-* 0x51: イ
-* 0x52: ウ
-* 0x53: エ
-* 0x54: オ
-* 0x55: カ
-* 0x56: キ
-* 0x57: ク
-* 0x58: ケ
-* 0x59: コ
-* 0x5A: サ
-* 0x5B: シ
-* 0x5C: ス
-* 0x5D: セ
-* 0x5E: ソ
-* 0x5F: タ
-* 0x60: チ
-* 0x61: ツ
-* 0x62: テ
-* 0x63: ト
-* 0x64: ナ
-* 0x65: ニ
-* 0x66: ヌ
-* 0x67: ネ
-* 0x68: ノ
-* 0x69: ハ
-* 0x6A: ヒ
-* 0x6B: フ
-* 0x6C: ヘ
-* 0x6D: ホ
-* 0x6E: マ
-* 0x6F: ミ
-* 0x70: ム
-* 0x71: メ
-* 0x72: モ
-* 0x73: ヤ
-* 0x74: ユ
-* 0x75: ヨ
-* 0x76: ラ
-* 0x77: リ
-* 0x78: ル
-* 0x79: レ
-* 0x7A: ロ
-* 0x7B: ワ
-* 0x7C: ヲ
-* 0x7D: ン
-* 0x7E: ァ
-* 0x7F: ィ
-* 0x80: ゥ
-* 0x81: ェ
-* 0x82: ォ
-* 0x83: ャ
-* 0x84: ュ
-* 0x85: ョ
-* 0x86: ッ
-* 0x87: ガ
-* 0x88: ギ
-* 0x89: グ
-* 0x8A: ゲ
-* 0x8B: ゴ
-* 0x8C: ザ
-* 0x8D: ジ
-* 0x8E: ズ
-* 0x8F: ゼ
-* 0x90: ゾ
-* 0x91: ダ
-* 0x92: ヂ
-* 0x93: ヅ
-* 0x94: デ
-* 0x95: ド
-* 0x96: バ
-* 0x97: ビ
-* 0x98: ブ
-* 0x99: ベ
-* 0x9A: ボ
-* 0x9B: パ
-* 0x9C: ピ
-* 0x9D: プ
-* 0x9E: ペ
-* 0x9F: ポ
-* 0xA0: ～
-* 0xA1: ！
-* 0xA2: ？
-* 0xA3: ー
-* 0xA4: .
-* 0xA5: ..
-* 0xA6: <Heart>
-* 0xA7: &
-* 0xA8: 、
-* 0xA9: 。
-* 0xAA: (
-* 0xAB: )
-* 0xAC: <Circle>
-* 0xAD: <X>
-* 0xAE: <Triangle>
-* 0xAF: _
-* 0xB0: A
-* 0xB1: B
-* 0xB2: C
-* 0xB3: D
-* 0xB4: E
-* 0xB5: F
-* 0xB6: G
-* 0xB7: H
-* 0xB8: I
-* 0xB9: J
-* 0xBA: K
-* 0xBD: N
-* 0xBE: O
-* 0xBF: P
-* 0xC1: R
-* 0xC2: S
-* 0xC3: T
-* 0xC4: U
-* 0xC5: V
-* 0xC8: Y
-* 0xC9: Z
-* 0xCA: <Begin Line>
-* 0xCB: <Mid Line>
-* 0xCC: <End Line>
-* 0xCD: <Cursor>
-* 0xCE: 「
-* 0xCF: 」
-* 0xD0: 0
-* 0xD1: 1
-* 0xD2: 
-* 0xD3: 
-* 0xD4: 4
-* 0xD5: 5
-* 0xD6: 6
-* 0xD7: 7
-* 0xD8: 8
-* 0xD9: 9
-* 0xDA: 同
-* 0xE7: 心
+* `0x00 0x00`
+* `0x00 0x01`
+* `0x00 0x03`
+* `0x01 0x00`
+* `0x01 0x01`
+* `0x02 0x00`
+* `0x02 0x01`
+* `0x03 0x00`
+* `0x03 0x01`
 
-### Control Characters
-* 0xF0: Unused
-* 0xF1: Pause. Pauses dialog for dramatic effect. The subsequent byte indicates the length of the pause. Values used in the game are: 
-  * 0x00
-  * 0x02
-  * 0x03
-  * 0x05
-  * 0x08
-  * 0x10
-  * 0x15
-  * 0x20
-  * 0x30
-* 0xF2: Animation. Causes animation to progress in first person dialog sequences.
-* 0xF3: Turns off _Regular Mode_
-* 0xF4: Turns on _Kanji Mode_
-* 0xF5: Choice. The subsequent byte indicates the type of choice:
-  * 0x00: Yes/No Choice
-  * 0x01: Number Choice
-  * 0x02: Pick item during fight
-* 0xF6: Icon Display. With the subsequent byte, displays a 2x2 tile icon located at `0x48000 + 0x40 * [2nd Byte]`
-* 0xF7: Shifts to _Jumbo Mode_
-* 0xF8: Play Music. The subsequent byte indicates the music played:
-  * 0x06
-  * 0x08
-  * 0x0C
-  * 0x0E
-  * 0x11
-  * 0x13
-  * 0x1A
-  * 0x1D
-  * 0x1E
-  * 0x21
-  * 0xFA
-  * 0xFF: Silence
-* 0xF9: Play Sound. The subsquent byte indicates the sound played:
-  * 0x23: Error
-  * 0x24
-  * 0x29
-  * 0x2A
-  * 0x2E: Get Item
-  * 0x2F
-  * 0x36
-  * 0x27
-  * 0x65
-  * 0x66
-  * 0x6A
-  * 0x67
-  * 0x72
-* 0xFA: Hard Coded Text. The subsequent byte indicates the text displayed:
-  * 0x01: Test Spacing (For Icons)
-  * 0x02: 手に入れた！
-  * 0x04: イエス　ノー
-  * 0x05: かべしんぶん　ミルフィーユ•タイムズ NO.
-  * 0x80: <Player Name>
-  * 0x81: <Player Gold Balance>
-  * 0x82: <Player gold balance saved at certain point in the game and repeated later for comedic effect>
-* 0xFB: Jump. The two bytes following this byte jump to another line. See the Dialog Address Table for details.
-* 0xFC: Set Game Flag. Always followed by a second byte. This is a pair of control bytes related to altering game variables. For example, sometimes dialog begins as soon as a map is entered for special events. 0xFC byte pairs set some variable that prevents the dialog from popping up forever once the automatic dialog is experienced once.
-* 0xFD: Return
-* 0xFE: Space
-* 0xFF: End Line
+### Control Codes
+* `0xF1 0x__` -- Text Speed. The second byte indicates the speed. 0x00 is normal speed and higher numbers are slower:
+* `0xF2` -- Animation. Triggers animation during first-person dialog sequences.
+* `0xF3` -- Shift to Kana Mode.
+* `0xF4` -- Shift to on Kanji Mode.
+* `0xF5 0x__` -- Choice. The second byte indicates the type of choice.
+* `0xF6 0x__` -- Icon. The second byte displays a 2x2 tile icon from `0x48000 + 0x40 * [2nd Byte]`
+* `0xF7` -- Shift to Jumbo Mode.
+* `0xF8 0x__` -- Change Music. The second byte indicates the music played.
+* `0xF9 0x__` -- Play Sound. The second byte indicates the sound played:
+* `0xFA 0x__` -- Displays text. The subsequent byte indicates the text displayed.
+* `0xFB 0x__ 0x__` -- Jump to another line. The two byte are the address of the line in the Dialog Address Table. See that section for details. Only occurs immediately before `0xFF` End of Line.
+* `0xFC 0x__` Flag. This changes a game variable or flag. This is related to altering game variables. For example, a dialog may begin as soon as a map is entered and the `0xFC` byte pair sets a variable preventing this same dialog from popping up again.
+* `0xFD` -- Newline. Also, if in Jumbo mode, shifts back to Kana Mode.
+* `0xFE` -- Space
+* `0xFF` -- End of Line
 
-### Kanji Mode (0xF4) ###
-The font tile at the font tile `0x50DA0 * 0x10 * <byte value>` is displayed. Even when in this mode, control characters are still valid. 0xF3 is used to shift back to regular mode. Control characters used in the game during Kanji Mode include: 0xF3, 0xF4, 0xF6, 0xF8, 0xF9, 0xFA, 0xFC, 0xFD, 0xFE, 0xFF
+#### Control Code Examples
+* `0xF1 0x00` -- [Text Speed 0x00]
+* `0xF1 0x02` -- [Text Speed 0x02]
+* `0xF1 0x03` -- [Text Speed 0x03]
+* `0xF1 0x05` -- [Text Speed 0x05]
+* `0xF1 0x08` -- [Text Speed 0x08]
+* `0xF1 0x10` -- [Text Speed 0x10]
+* `0xF1 0x15` -- [Text Speed 0x15]
+* `0xF1 0x20` -- [Text Speed 0x20]
+* `0xF1 0x30` -- [Text Speed 0x30]
+* `0xF2` -- [Animation]
+* `0xF3` -- [Kana]
+* `0xF4` -- [Kanji]
+* `0xF5 0x00` -- [Choice Yes/No]
+* `0xF5 0x01` -- [Choice Number]
+* `0xF5 0x02` -- [Choice Item]
+* `0xF6 0x00` -- [Icon Wooden Shield]
+* `0xF6 0x01` -- [Icon Leather Shield]
+* `0xF6 0x02` -- [Icon Iron Shield]
+* `0xF6 0x03` -- [Icon Mirror Shield]
+* `0xF6 0x04` -- [Icon Money]
+* `0xF6 0x05` -- [Icon Bracelets]
+* `0xF6 0x06` -- [Icon Glove]
+* `0xF6 0x07` -- [Icon Frog]
+* `0xF6 0x08` -- [Icon Scroll]
+* `0xF6 0x09` -- [Icon Book]
+* `0xF6 0x0A` -- [Icon Mammoth Controller]
+* `0xF6 0x0B` -- [Icon Flute]
+* `0xF6 0x0C` -- [Icon Frog Bottle]
+* `0xF6 0x0D` -- [Icon Human Bottle]
+* `0xF6 0x0E` -- [Icon Heart Bottle]
+* `0xF6 0x0F` -- [Icon Big Heart Bottle]
+* `0xF6 0x11` -- [Icon Fruit]
+* `0xF6 0x12` -- [Icon Egg]
+* `0xF6 0x13` -- [Icon Saw]
+* `0xF6 0x14` -- [Icon Axe]
+* `0xF6 0x15` -- [Icon Wasabi]
+* `0xF6 0x16` -- [Icon Door]
+* `0xF6 0x17` -- [Icon Tablet]
+* `0xF6 0x19` -- [Icon Bronze Sword]
+* `0xF6 0x1A` -- [Icon Silver Sword]
+* `0xF6 0x1B` -- [Icon Golden Sword]
+* `0xF6 0x1C` -- [Icon Heart]
+* `0xF6 0x1D` -- [Icon Star]
+* `0xF6 0x1E` -- [Icon Moon]
+* `0xF6 0x24` -- [Icon Heart Key]
+* `0xF6 0x25` -- [Icon Spade Key]
+* `0xF6 0x26` -- [Icon Diamond Key]
+* `0xF6 0x27` -- [Icon Club Key]
+* `0xF7` -- [Jumbo]
+* `0xF8 0x01` -- [BGM Fade] -- (Not used in the game)
+* `0xF8 0x06` -- [BGM Defeat]
+* `0xF8 0x08` -- [BGM Panic+Intro]
+* `0xF8 0x0C` -- [BGM Furing]
+* `0xF8 0x0E` -- [BGM A La Mode]
+* `0xF8 0x11` -- [BGM Seamizu]
+* `0xF8 0x13` -- [BGM Underground]
+* `0xF8 0x1A` -- [BGM Assault]
+* `0xF8 0x1D` -- [BGM Reunion]
+* `0xF8 0x1E` -- [BGM Last Duel]
+* `0xF8 0x21` -- [BGM Flute]
+* `0xF8 0xFA` -- [BGM Speech Off]
+* `0xF8 0xFF` -- [BGM Off]
+* `0xF9 0x23` -- [SFX Error]
+* `0xF9 0x24` -- [SFX Pickup]
+* `0xF9 0x29` -- [SFX Jump]
+* `0xF9 0x2A` -- [SFX Suprise]
+* `0xF9 0x2E` -- [SFX Upgrade]
+* `0xF9 0x2F` -- [SFX Mystery]
+* `0xF9 0x36` -- [SFX Flute]
+* `0xF9 0x37` -- [SFX Victory]
+* `0xF9 0x46` -- [SFX Roar]
+* `0xF9 0x65` -- [SFX Punch]
+* `0xF9 0x66` -- [SFX Kick]
+* `0xF9 0x67` -- [SFX Stab]
+* `0xF9 0x6A` -- [SFX Snore]
+* `0xF9 0x72` -- [SFX Off]
+* `0xFA 0x01` -- [Text Space For Icon]
+* `0xFA 0x02` -- [Text Item Get] -- "手に入れた！"
+* `0xFA 0x04` -- [Text Yes/No]  -- "イエス　ノー"
+* `0xFA 0x05` -- [Text News] -- "かべしんぶん　ミルフィーユ•タイムズ NO."
+* `0xFA 0x80:` -- [Text Name]
+* `0xFA 0x81` -- [Text Nuts]
+* `0xFA 0x82` -- [Text Spent] -- (This is the player's money balance saved at certain point in the game and repeated later for comedic effect).
+* `0xFD` -- [Newline]
+* `0xFE` -- [Space]
+* `0xFF` -- [End of Line]
 
-* 0x00: 同
-* 0x01: 代
-* 0x02: 安
-* 0x03: 京
-* 0x04: 氷
-* 0x05: 河
-* 0x06: 王
-* 0x07: 子
-* 0x08: 巨
-* 0x09: 人
-* 0x0A: 々
-* 0x0B: 山
-* 0x0C: 時
-* 0x0D: 心
-* 0x0E: 大
-* 0x0F: 岩
-* 0x10: 日
-* 0x11: 回
-* 0x12: 火
-* 0x13: 水
-* 0x14: 木
-* 0x15: 年
-* 0x16: 上
-* 0x17: 下
-* 0x18: 平
-* 0x19: 和
-* 0x1A: 左
-* 0x1B: 右
-* 0x1C: 東
-* 0x1D: 西
-* 0x1E: 南
-* 0x1F: 北
-* 0x20: 国
-* 0x21: 女
-* 0x22: 姫
-* 0x23: 金
-* 0x24: 小
-* 0x25: 中
-* 0x26: 行
-* 0x27: 百
-* 0x28: 十
-* 0x29: 千
-* 0x2A: 万
-* 0x2B: 変
-* 0x2C: 身
-* 0x2D: 申
-* 0x2E: 二
-* 0x2F: 町
-* 0x30: 所
-* 0x31: 今
-* 0x32: 力
-* 0x33: 村
-* 0x34: 店
-* 0x35: 用
-* 0x36: 手
-* 0x37: 先
-* 0x38: 目
-* 0x39: 乱
-* 0x3A: 私
-* 0x3B: 友
-* 0x3C: 井
-* 0x3D: 戸
-* 0x3E: 元
-* 0x3F: 必
-* 0x40: 間
-* 0x41: 奴
-* 0x43: 本
-* 0x44: 自
-* 0x45: 分
-* 0x46: 気
-* 0x47: 失
-* 0x48: 死
-* 0x49: 入
-* 0x4A: 匹
-* 0x4B: 穴
-* 0x4E: 兵
-* 0x4F: 士
-* 0x50: 少
-* 0x51: 以
-* 0x52: 出
-* 0x53: 我
-* 0x54: 恐
-* 0x55: 近
-* 0x56: 当
-* 0x57: 湖
-* 0x58: 内
-* 0x59: 外
-* 0x5A: 海
-* 0x5B: 全
-* 0x5C: 主
-* 0x5D: 方
-* 0x5E: 向
-* 0x5F: 字
-* 0x61: 記
-* 0x62: 世
-* 0x63: 宝
-* 0x64: 法
-* 0x65: 口
-* 0x6B – 0xD9: Unused / Blank Spots
+### Kana Mode
 
-### Jumbo Mode (0xF7) ###
+A line starts in this mode at byte three (after the two header bytes). Unless a
+control code is encountered, the tile at `0x50000 + (0x10 * [byte value])` is
+displayed. `0xCA`, `0xCB` and `0xCC` are actually the beginning, middle and end
+of a long line respectively. `0xCD` represents the cursor.
+
+|          | **0** |  1   |  2   |  3   |  4   |  5   |  6   |  7   |  8   |  9   |  A   |  B   |  C   |  D   |  E   |  F   |
+| :------: | :---: | :--: | :--: | :--: | :--: | :--: | :--: | :--: | :--: | :--: | :--: | :--: | :--: | :--: | :--: | :--: |
+| **0x0_** |  あ   |  い  |  う  |  え  |  お  |  か  |  き  |  く  |  け  |  こ  |  さ  |  し  |  す  |  せ  |  そ  |  た  |
+| **0x1_** |  ち   |  つ  |  て  |  と  |  な  |  に  |  ぬ  |  ね  |  の  |  は  |  ひ  |  ふ  |  へ  |  ほ  |  ま  |  み  |
+| **0x2_** |  む   |  め  |  も  |  や  |  ゆ  |  よ  |  ら  |  り  |  る  |  れ  |  ろ  |  わ  |  を  |  ん  |  ぁ  |  ぃ  |
+| **0x3_** |  ぅ   |  ぇ  |  ぉ  |  ゃ  |  ゅ  |  ょ  |  っ  |  が  |  ぎ  |  ぐ  |  げ  |  ご  |  ざ  |  じ  |  ず  |  ぜ  |
+| **0x4_** |  ぞ   |  だ  |  ぢ  |  づ  |  で  |  ど  |  ば  |  び  |  ぶ  |  べ  |  ぼ  |  ぱ  |  ぴ  |  ぷ  |  ぺ  |  ぽ  |
+| **0x5_** |  ア   |  イ  |  ウ  |  エ  |  オ  |  カ  |  キ  |  ク  |  ケ  |  コ  |  サ  |  シ  |  ス  |  セ  |  ソ  |  タ  |
+| **0x6_** |  チ   |  ツ  |  テ  |  ト  |  ナ  |  ニ  |  ヌ  |  ネ  |  ノ  |  ハ  |  ヒ  |  フ  |  ヘ  |  ホ  |  マ  |  ミ  |
+| **0x7_** |  ム   |  メ  |  モ  |  ヤ  |  ユ  |  ヨ  |  ラ  |  リ  |  ル  |  レ  |  ロ  |  ワ  |  ヲ  |  ン  |  ァ  |  ィ  |
+| **0x8_** |  ゥ   |  ェ  |  ォ  |  ャ  |  ュ  |  ョ  |  ッ  |  ガ  |  ギ  |  グ  |  ゲ  |  ゴ  |  ザ  |  ジ  |  ズ  |  ゼ  |
+| **0x9_** |  ゾ   |  ダ  |  ヂ  |  ヅ  |  デ  |  ド  |  バ  |  ビ  |  ブ  |  ベ  |  ボ  |  パ  |  ピ  |  プ  |  ペ  |  ポ  |
+| **0xA_** |  ～   |  ！  |  ？  |  ー  |  ．  |  ‥   |  ❤   |  ＆  |  、  |  。  |  （  |  ）  |  ◯   |  ✕   |  △   |  ＿  |
+| **0xB_** |  Ａ   |  Ｂ  |  Ｃ  |  Ｄ  |  Ｅ  |  Ｆ  |  Ｇ  |  Ｈ  |  Ｉ  |  Ｊ  |  Ｋ  |  Ｌ  |  Ｍ  |  Ｎ  |  Ｏ  |  Ｐ  |
+| **0xC_** |  Ｑ   |  Ｒ  |  Ｓ  |  Ｔ  |  Ｕ  |  Ｖ  |  Ｗ  |  Ｘ  |  Ｙ  |  Ｚ  |  ー  |  ー  |  ー  |  ▽   |  「  |  」  |
+| **0xD_** |  ０   |  １  |  ２  |  ３  |  ４  |  ５  |  ６  |  ７  |  ８  |  ９  |  同  |      |      |      |      |      |
+| **0xE_** |       |      |      |      |      |      |      |  心  |      |      |      |      |      |      |      |      |
+
+### Kanji Mode ###
+
+The font tile at the font tile `0x50DA0 * 0x10 * <byte value>` is displayed. 
+
+|          | **0** |  1   |  2   |  3   |  4   |  5   |  6   |  7   |  8   |  9   |  A   |  B   |  C   |  D   |  E   |  F   |
+| :------: | :---: | :--: | :--: | :--: | :--: | :--: | :--: | :--: | :--: | :--: | :--: | :--: | :--: | :--: | :--: | :--: |
+| **0x0_** |  同   |  代  |  安  |  京  |  氷  |  河  |  王  |  子  |  巨  |  人  |  々  |  山  |  時  |  心  |  大  |  岩  |
+| **0x1_** |  日   |  回  |  火  |  水  |  木  |  年  |  上  |  下  |  平  |  和  |  左  |  右  |  東  |  西  |  南  |  北  |
+| **0x2_** |  国   |  女  |  姫  |  金  |  小  |  中  |  行  |  百  |  十  |  千  |  万  |  変  |  身  |  申  |  二  |  町  |
+| **0x3_** |  所   |  今  |  力  |  村  |  店  |  用  |  手  |  先  |  目  |  乱  |  私  |  友  |  井  |  戸  |  元  |  必  |
+| **0x4_** |  間   |  奴  |      |  本  |  自  |  分  |  気  |  失  |  死  |  入  |  匹  |  穴  |      |      |  兵  |  士  |
+| **0x5_** |  少   |  以  |  出  |  我  |  恐  |  近  |  当  |  湖  |  内  |  外  |  海  |  全  |  主  |  方  |  向  |  字  |
+| **0x6_** |       |  記  |  世  |  宝  |  法  |  口  |      |      |      |      |      |      |      |      |      |      |
+
+### Jumbo Mode ###
 Displays special 2x2 font tile at `0x51800 + 0x40 * <Byte Value>`
 
-Even when in this mode, control characters are still valid. 0xFD returns as normal and shifts back to regular mode. Control characters used in the game during Kanji Mode include: 0xF9, 0xFD, 0xFE, 0xFF.
-
-* 0x00: タ
-* 0x01: ダ
-* 0x02: ゲ
-* 0x03: ッ
-* 0x04: !
-* 0x05: ?
-* 0x06: な
-* 0x07: に
-* 0x08: ー
-* 0x09: っ
-* 0x0A: 許
-* 0x0B: せ
-* 0x0C: ん
-* 0x0D: ス
-* 0x0E: ポ
-* 0x0F: ア
-* 0x10: ～
-* 0x11: レ
-* 0x12: Z
-* 0x13: ..
-* 0x14: ギ
-* 0x15: ャ
-* 0x16: ぐ
-* 0x17: わ
-* 0x18: 同
-* 0x19: じ
-* 0x1C: ハ
-* 0x1F: ぁ
+|          | **0** |  1   |  2   |  3   |  4   |  5   |  6   |  7   |  8   |  9   |  A   |  B   |  C   |  D   |  E   |  F   |
+| :------: | :---: | :--: | :--: | :--: | :--: | :--: | :--: | :--: | :--: | :--: | :--: | :--: | :--: | :--: | :--: | :--: |
+| **0x0_** |  タ   |  ダ  |  ゲ  |  ッ  |  !   |  ?   |  な  |  に  |  ー  |  っ  |  許  |  せ  |  ん  |  ス  |  ポ  |  ア  |
+| **0x1_** |  ～   |  レ  |  Z   |  ‥   |  ギ  |  ャ  |  ぐ  |  わ  |  同  |  じ  |      |      |  ハ  |      |      |  ぁ  |

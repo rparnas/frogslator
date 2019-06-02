@@ -1,4 +1,4 @@
-namespace Frogslator
+namespace Frog
 {
     partial class GraphicsControl
     {
@@ -36,9 +36,7 @@ namespace Frogslator
             this.AutoScaleMode = System.Windows.Forms.AutoScaleMode.Font;
             this.BackColor = System.Drawing.SystemColors.ActiveCaptionText;
             this.Name = "GraphicsControl";
-            this.Paint += new System.Windows.Forms.PaintEventHandler(this.GraphicsControl_Paint);
             this.ResumeLayout(false);
-
         }
 
         #endregion

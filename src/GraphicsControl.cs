@@ -1,103 +1,108 @@
-using System;
 using System.Collections.Generic;
-using System.ComponentModel;
 using System.Drawing;
-using System.Data;
-using System.Linq;
-using System.Text;
-using System.Windows.Forms;
 using System.IO;
+using System.Linq;
+using System.Windows.Forms;
 
-namespace Frogslator
+namespace Frog
 {
-    public partial class GraphicsControl : UserControl
+  public partial class GraphicsControl : UserControl
+  {
+    Dictionary<char, Bitmap> Letters;
+    List<List<string>> Pages;
+    public int PageIndex { get; private set; }
+    public int PageCount => Pages.Count;
+    public int Cols { get; private set; }
+    public int Rows { get; private set; }
+
+    public GraphicsControl()
     {
-        private Dictionary<char, Bitmap> letters = new Dictionary<char, Bitmap>();
-        private string text = "";
-        private int page = 1;
-        public int TotalPages = 6;
+      if (!Program.IsRuning)
+      {
+        return;
+      }
 
-        public GraphicsControl()
+      InitializeComponent();
+
+      Paint += (s, e) =>
+      {
+        var page = Pages[PageIndex];
+
+        for (var row = 0; row < Rows; row++)
         {
-            InitializeComponent();
-
-            if (Program.ROM == null) { return; }
-
-            // Load the non-capital letters.
-            FileInfo[] f1 = new DirectoryInfo(Program.ResourcesDirectory + "Graphics\\Text").GetFiles("*.jpg");
-            FileInfo[] f2 = new DirectoryInfo(Program.ResourcesDirectory + "Graphics\\Text\\Cap").GetFiles("*.jpg");
-            List<FileInfo> files = new List<FileInfo>();
-            files.AddRange(f1);
-            files.AddRange(f2);
-
-            foreach (FileInfo file in files)
-            {
-                string name = file.Name.Replace(".jpg", "");
-                char c = name[0];
-                if (name.Equals("question"))
-                {
-                    c = '?';
-                }
-                else if (name.Equals("quote"))
-                {
-                    c = '\"';
-                }
-                else if (name.Equals("space"))
-                {
-                    c = ' ';
-                }
-                letters.Add(c, new Bitmap(file.DirectoryName + "\\" + file.Name));
-            }
+          var line = row < page.Count ? page[row] : "";
+          for (var col = 0; col < Cols; col++)
+          {
+            var c = col < line.Length ? line[col] : ' ';
+            e.Graphics.DrawImage(Letters.ContainsKey(c) ? Letters[c] : Letters['?'], new Point(32 * col, 32 * row));
+          }
         }
+      };
 
-        // Sets the text this control displays.
-        public void SetText(int pg, string s)
+      // Load Graphics
+      Letters = new Dictionary<char, Bitmap>();
+      var lower = new DirectoryInfo(Program.ResourcesDirectory + "Graphics\\Text").GetFiles("*.jpg");
+      var capital = new DirectoryInfo(Program.ResourcesDirectory + "Graphics\\Text\\Cap").GetFiles("*.jpg");
+      foreach (FileInfo file in lower.Concat(capital))
+      {
+        string name = file.Name.Replace(".jpg", "");
+        char c = name[0];
+        if (name.Equals("question"))
         {
-            this.text = s;
-            this.page = pg;
-            this.Refresh();
+          c = '?';
         }
-
-        // Called when the control is painted.
-        private void GraphicsControl_Paint(object sender, PaintEventArgs e)
+        else if (name.Equals("quote"))
         {
-            if (Program.ROM == null) { return; }
-
-            int numRows = this.Size.Height / 32;
-            int numCols = this.Size.Width / 32;
-
-            int index = 0;
-
-            int p = 1;
-            for (; index < this.text.Length; p++)
-            {
-                for (int row = 0; row < numRows; row++)
-                {
-                    for (int col = 0; col < numCols; col++)
-                    {
-                        char c = index < this.text.Length ? this.text[index] : ' ';
-
-                        if (c == '\n')
-                        {
-                            while (col < numCols)
-                            {
-                                if (p == page)
-                                {
-                                    e.Graphics.DrawImage(this.letters[' '], new Point(32 * col, 32 * row));
-                                }
-                                col++;
-                            }
-                        }
-                        else if (p == page) // Only draw if you are on the correct page.
-                        {
-                            Bitmap b = this.letters.ContainsKey(c) ? this.letters[c] : this.letters['?'];
-                            e.Graphics.DrawImage(b, new Point(32 * col, 32 * row));
-                        }
-                        index++;
-                    }
-                }
-            }
-            this.TotalPages = p-1;
+          c = '\"';
         }
+        else if (name.Equals("space"))
+        {
+          c = ' ';
+        }
+        Letters.Add(c, new Bitmap(file.DirectoryName + "\\" + file.Name));
+      }
+      PageIndex = 0;
+      Pages = new List<List<string>> { new List<string> { "" } };
     }
+
+    public void Setup(int pageIndex, int rows, int cols, string text)
+    {
+      var pages = new List<List<string>> { new List<string> { "" } };
+
+      void newline()
+      {
+        if (pages.Last().Count == rows)
+        {
+          pages.Add(new List<string> { "" });
+        }
+        else
+        {
+          pages.Last().Add("");
+        }
+      }
+
+      foreach (var c in text)
+      {
+        if (c == '\n')
+        {
+          newline();
+          continue;
+        }
+
+        if (pages.Last().Last().Length == cols)
+        {
+          newline();
+        }
+        pages.Last()[pages.Last().Count - 1] += c;
+      }
+
+      Cols = cols;
+      PageIndex = pageIndex < pages.Count ? pageIndex : pages.Count - 1;
+      Pages = pages;
+      Rows = rows;
+      Size = new Size(32 * cols, 32 * rows);
+
+      Refresh();
+    }
+  }
 }
