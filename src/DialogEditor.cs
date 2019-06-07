@@ -19,6 +19,7 @@ namespace Frog
       RecalculateFreeSpace(lines);
 
       InitializeComponent();
+      Text = Program.LastTranslationPath;
     
       Menu = new MainMenu(new[]
       {
@@ -27,20 +28,9 @@ namespace Frog
           new MenuItem("Save Translation to Disk...", (s, e) => Program.SaveTranslationToDisk(lines.Select(l => l.Translation).ToList())),
           new MenuItem("Load Translation from Disk...", (s, e) =>
           {
-            var result = Program.LoadTranslationFromDisk();
-            if (result != null)
-            {
-              foreach (var line in lines)
-              {
-                var translation = result.FirstOrDefault(t => t.Address == line.Address) ?? new Translation(line.Address);
-                line.Translation.Notes = translation.Notes;
-                line.Translation.Skip = translation.Skip;
-                line.Translation.Text = translation.Text;
-              }
-
-              RecalculateFreeSpace(lines);
-              DisplayLines(lines);
-            }
+            Program.LoadTranslationFromDisk(lines);
+            RecalculateFreeSpace(lines);
+            DisplayLines(lines);
           }),
           new MenuItem("-"),
           new MenuItem("Export ROM...", (s, e) => Program.SaveROMToDisk(rom, lines)),

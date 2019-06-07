@@ -23,7 +23,7 @@ namespace Frog
     public static string ROMFilter => "GameBoy File(*.gb)|*.gb";
     public static string TranslationFilter => "Frog File (*.frog)|*.frog";
 
-    static string LastROMPath
+    public static string LastROMPath
     {
       get => Settings.Default.LastROMPath;
       set
@@ -33,7 +33,7 @@ namespace Frog
       }
     }
 
-    static string LastTranslationPath
+    public static string LastTranslationPath
     {
       get => Settings.Default.LastTranslationPath;
       set
@@ -101,13 +101,17 @@ namespace Frog
       return ret;
     }
 
-    public static List<Translation> LoadTranslationFromDisk()
+    public static void LoadTranslationFromDisk(List<Line> lines)
     {
       var path = DoFileDialog(new OpenFileDialog(), "Load Translation", TranslationFilter, () => LastTranslationPath, p => LastTranslationPath = p);
-      return path == null ? null : LoadTranslationFromDisk(path);
+      if (path == null)
+      {
+        return;
+      }
+      LoadTranslationFromDisk(path, lines);
     }
 
-    public static List<Translation> LoadTranslationFromDisk(string path)
+    public static void LoadTranslationFromDisk(string path, List<Line> lines)
     {
       var ret = new List<Translation>();
       var translation = (Translation)null;
@@ -142,7 +146,13 @@ namespace Frog
         }
       }
 
-      return ret;
+      foreach (var line in lines)
+      {
+        var t = ret.FirstOrDefault(_ => _.Address == line.Address) ?? new Translation(line.Address);
+        line.Translation.Notes = t.Notes;
+        line.Translation.Skip = t.Skip;
+        line.Translation.Text = t.Text;
+      }
     }
 
     public static void SaveROMToDisk(byte[] rom, List<Line> lines)
@@ -318,10 +328,30 @@ namespace Frog
       Application.EnableVisualStyles();
       Application.SetCompatibleTextRenderingDefault(false);
 
-      var rom = LoadROMFromDisk();
-      if (rom == null)
+      var rom = (byte[])null;
+      var lines = (List<Line>)null;
+
+      if (File.Exists(LastROMPath) && File.Exists(LastTranslationPath) && MessageBox.Show("Reload last open Japanese ROM and translation?", "Reload?", MessageBoxButtons.YesNo) == DialogResult.Yes)
       {
-        return;
+        rom = LoadROMFromDisk(LastROMPath, out string loadROMError);
+        if (loadROMError != null)
+        {
+          MessageBox.Show(loadROMError);
+          return;
+        }
+
+        lines = Parser.GetLines(rom);
+
+        LoadTranslationFromDisk(LastTranslationPath, lines);
+      }
+      else
+      {
+        rom = LoadROMFromDisk();
+        lines = Parser.GetLines(rom);
+        if (rom == null)
+        {
+          return;
+        }
       }
 
       // Parse the lines of the DialogBlock from the ROM image.
@@ -339,9 +369,6 @@ namespace Frog
       {
         FontBitmaps.Add(new GameBoyTile(Graphics_Font, i, Palette, 4));
       }
-
-      // Parse text from the ROM.
-      var lines = Parser.GetLines(rom);
 
       // Show the dialog editing screen.
       Application.Run(new DialogEditor(rom, lines));
