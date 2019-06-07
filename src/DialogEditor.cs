@@ -182,7 +182,19 @@ namespace Frog
 
       var text = line.Translation.Text;
       text = text.Replace("[Text Name]", cb_SixLetterNames.Checked ? "~Name~" : "NAME");
-      text = Regex.Replace(text, "(\\[.*\\])", "");
+      while (text.Contains("["))
+      {
+        var openIndex = text.IndexOf('[');
+        var closeIndex = text.IndexOf(']');
+        if (closeIndex == -1)
+        {
+          break;
+        }
+        else
+        {
+          text = text.Remove(openIndex, closeIndex - openIndex + 1);
+        }
+      }
 
       previewControl.Setup(reset, line.BoxHeight, line.BoxWidth, text);
 

@@ -89,7 +89,10 @@ namespace Frog
       var newPages = pages.Count;
 
       Cols = cols;
-      PageIndex = reset ? 0 : newPages != oldPages && PageIndex == oldPages - 1 ? newPages - 1 : PageIndex;
+      PageIndex = reset ? 0 : 
+                  newPages != oldPages && PageIndex == oldPages - 1 ? newPages - 1 : 
+                  PageIndex >= pages.Count ? newPages -1 :
+                  PageIndex;
       Pages = pages;
       Rows = rows;
       Size = new Size(32 * cols, 32 * rows);
