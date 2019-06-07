@@ -63,6 +63,10 @@ namespace Frog
         btn_PreviewUp.Enabled = previewControl.PageIndex > 0;
       };
 
+      cb_FilterErrors.CheckedChanged += (s, e) => DisplayLines(lines);
+
+      cb_FilterUntranslated.CheckedChanged += (s, e) => DisplayLines(lines);
+
       cb_SixLetterNames.CheckedChanged += (s, e) => DisplayPreview(false, SelectedLine);
 
       cb_Skip.CheckedChanged += (s, e) =>
@@ -83,29 +87,26 @@ namespace Frog
 
       tb_Translation.TextChanged += (s, e) =>
       {
-        var oldLen = 0;
-        try
-        {
-          oldLen = SelectedLine.Compose().Length;
-        }
-        catch (NotImplementedException) { }
-
+        var oldBytes = SelectedLine.Compose(out string oldBytesError);
         SelectedLine.Translation.Text = tb_Translation.Text.Replace("\r\n", "\n");
-        var newLen = 0;
-        try
-        {
-          newLen = SelectedLine.Compose().Length;
-        }
-        catch (NotImplementedException) { }
+        var newBytes = SelectedLine.Compose(out string newBytesError);
 
         if (SelectedLine.Block >= 0)
         {
-          BlockSizes[SelectedLine.Block] -= oldLen;
-          BlockSizes[SelectedLine.Block] += newLen;
+          BlockSizes[SelectedLine.Block] -= oldBytes?.Length ?? 0;
+          BlockSizes[SelectedLine.Block] += newBytes?.Length ?? 0;
           DisplayFreeSpace();
         }
 
-        lbl_Translation.Text = $"Translation ({newLen} bytes):";
+        if (!string.IsNullOrEmpty(newBytesError))
+        {
+          lbl_Translation.Text = $"Translation -- Error: {newBytesError}";
+        }
+        else
+        {
+          lbl_Translation.Text = $"Translation ({newBytes?.Length.ToString() ?? "?"} bytes):";
+        }
+
         DisplayPreview(false, SelectedLine);
       };
 
@@ -117,8 +118,8 @@ namespace Frog
     {
       string FreeSpaceString(int i)
       {
-        var bytesFree = Program.BlockMaxSize - BlockSizes[i];
-        var pctFree = (100 * ((double)(Program.BlockMaxSize - BlockSizes[i]) / Program.BlockMaxSize)).ToString("N2");
+        var bytesFree = Program.MaxBlockSize - BlockSizes[i];
+        var pctFree = (100 * ((double)(Program.MaxBlockSize - BlockSizes[i]) / Program.MaxBlockSize)).ToString("N2");
         return $"Block {i}: {bytesFree} bytes free ({pctFree}%)";
       }
 
@@ -157,6 +158,14 @@ namespace Frog
           continue;
         }
         if (!string.IsNullOrWhiteSpace(tb_SearchInTranslation.Text) && !line.Translation.Text.Contains(tb_SearchInTranslation.Text))
+        {
+          continue;
+        }
+        if (cb_FilterErrors.Checked && (line.Compose(out string error) != null || error == null))
+        {
+          continue;
+        }
+        if (cb_FilterUntranslated.Checked && !string.IsNullOrEmpty(line.Translation.Text) && !line.Translation.Skip)
         {
           continue;
         }
@@ -202,7 +211,7 @@ namespace Frog
       }
       foreach (var l in lines.Where(l => l.Block >= 0))
       {
-        BlockSizes[l.Block] += l.Compose().Length;
+        BlockSizes[l.Block] += l.Compose(out string unused)?.Length ?? 0;
       }
     }
   }

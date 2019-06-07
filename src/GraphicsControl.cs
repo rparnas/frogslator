@@ -16,16 +16,16 @@ namespace Frog
 
     public GraphicsControl()
     {
-      if (!Program.IsRuning)
-      {
-        return;
-      }
-
       InitializeComponent();
       DoubleBuffered = true;
 
       Paint += (s, e) =>
       {
+        if (Pages == null)
+        {
+          return;
+        }
+
         var page = Pages[PageIndex];
 
         for (var row = 0; row < Rows; row++)
@@ -34,10 +34,10 @@ namespace Frog
           for (var col = 0; col < Cols; col++)
           {
             var c = col < line.Length ? line[col] : ' ';
-            var i = c == ' ' ? 79 :
-                    Parser.ReverseLatin.ContainsKey(c) ? Parser.ReverseLatin[c] : 
-                    Parser.ReverseLatin['?'];
-            var bmp = Program.FontBitmaps[i];
+            var spaceIndex = 79;
+            var qmIndex = Parser.ReverseLatin['?'];
+            var i = c == ' ' ? spaceIndex : Parser.ReverseLatin.ContainsKey(c) ? Parser.ReverseLatin[c] : qmIndex;
+            var bmp = i < Program.FontBitmaps.Count ? Program.FontBitmaps[i] : Program.FontBitmaps[qmIndex];
             e.Graphics.DrawImage(bmp.Bitmap, new Point(32 * col, 32 * row));
           }
         }
@@ -50,7 +50,6 @@ namespace Frog
     public void SetPage(int pageIndex)
     {
       PageIndex = pageIndex;
-
       Refresh();
     }
 
@@ -90,10 +89,7 @@ namespace Frog
       var newPages = pages.Count;
 
       Cols = cols;
-      PageIndex = reset ? 0 :
-                  newPages > oldPages && PageIndex == oldPages - 1 ? newPages - 1 :
-                  newPages < oldPages && PageIndex == oldPages - 1 ? newPages - 1 :
-                  PageIndex;
+      PageIndex = reset ? 0 : newPages != oldPages && PageIndex == oldPages - 1 ? newPages - 1 : PageIndex;
       Pages = pages;
       Rows = rows;
       Size = new Size(32 * cols, 32 * rows);

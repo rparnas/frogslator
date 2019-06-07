@@ -7,7 +7,7 @@ namespace Frog
   {
     public readonly int Address;
     public readonly byte[] Body;
-    public readonly Func<byte[]> Compose;
+    readonly ComposeDelegate ComposeDelegate;
     public readonly int BoxHeight;
     public readonly int BoxWidth;
     public readonly int DialogAddressTableLocation;
@@ -42,11 +42,11 @@ namespace Frog
       }
     }
 
-    public Line(int address, int datLocation, int boxHeight, int boxWidth, byte[] header, byte[] body, byte[] footer, Func<byte[], string> parseBody, Func<Line, Translation, byte[]> compose)
+    public Line(int address, int datLocation, int boxHeight, int boxWidth, byte[] header, byte[] body, byte[] footer, Func<byte[], string> parseBody, ComposeDelegate compose)
     {
       Address = address;
       Body = body;
-      Compose = () => compose(this, Translation);
+      ComposeDelegate = compose;
       BoxHeight = boxHeight;
       BoxWidth = boxWidth;
       DialogAddressTableLocation = datLocation;
@@ -56,6 +56,10 @@ namespace Frog
       Translation = new Translation(address);
     }
 
+    public byte[] Compose(out string error) => ComposeDelegate(this, Translation, out error);
+
     public override string ToString() => Address.ToString("X2");
   }
+
+  public delegate byte[] ComposeDelegate(Line line, Translation translation, out string error);
 }

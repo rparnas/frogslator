@@ -41,6 +41,7 @@ namespace Frog
       this.lbl_Lines = new System.Windows.Forms.Label();
       this.gb_Line = new System.Windows.Forms.GroupBox();
       this.tb_Notes = new System.Windows.Forms.TextBox();
+      this.previewControl = new Frog.GraphicsControl();
       this.lbl_Text = new System.Windows.Forms.Label();
       this.lbl_Notes = new System.Windows.Forms.Label();
       this.tb_Text = new System.Windows.Forms.TextBox();
@@ -52,8 +53,9 @@ namespace Frog
       this.label1 = new System.Windows.Forms.Label();
       this.tb_SearchInTranslation = new System.Windows.Forms.TextBox();
       this.gb_Footer = new System.Windows.Forms.GroupBox();
-      this.previewControl = new Frog.GraphicsControl();
       this.cb_SixLetterNames = new System.Windows.Forms.CheckBox();
+      this.cb_FilterErrors = new System.Windows.Forms.CheckBox();
+      this.cb_FilterUntranslated = new System.Windows.Forms.CheckBox();
       this.gb_Line.SuspendLayout();
       this.gb_Footer.SuspendLayout();
       this.SuspendLayout();
@@ -69,7 +71,7 @@ namespace Frog
       // 
       this.lbl_UsefulGlyphs.Anchor = ((System.Windows.Forms.AnchorStyles)((System.Windows.Forms.AnchorStyles.Bottom | System.Windows.Forms.AnchorStyles.Left)));
       this.lbl_UsefulGlyphs.AutoSize = true;
-      this.lbl_UsefulGlyphs.Location = new System.Drawing.Point(5, 14);
+      this.lbl_UsefulGlyphs.Location = new System.Drawing.Point(5, 18);
       this.lbl_UsefulGlyphs.Name = "lbl_UsefulGlyphs";
       this.lbl_UsefulGlyphs.Size = new System.Drawing.Size(227, 13);
       this.lbl_UsefulGlyphs.TabIndex = 7;
@@ -79,7 +81,7 @@ namespace Frog
       // 
       this.tb_UsefulGlyphs.Anchor = ((System.Windows.Forms.AnchorStyles)((System.Windows.Forms.AnchorStyles.Bottom | System.Windows.Forms.AnchorStyles.Left)));
       this.tb_UsefulGlyphs.Font = new System.Drawing.Font("Courier New", 14.25F, System.Drawing.FontStyle.Bold, System.Drawing.GraphicsUnit.Point, ((byte)(0)));
-      this.tb_UsefulGlyphs.Location = new System.Drawing.Point(8, 30);
+      this.tb_UsefulGlyphs.Location = new System.Drawing.Point(8, 34);
       this.tb_UsefulGlyphs.Name = "tb_UsefulGlyphs";
       this.tb_UsefulGlyphs.ReadOnly = true;
       this.tb_UsefulGlyphs.Size = new System.Drawing.Size(224, 29);
@@ -134,7 +136,7 @@ namespace Frog
       // 
       this.lbl_SearchInText.Anchor = ((System.Windows.Forms.AnchorStyles)((System.Windows.Forms.AnchorStyles.Bottom | System.Windows.Forms.AnchorStyles.Left)));
       this.lbl_SearchInText.AutoSize = true;
-      this.lbl_SearchInText.Location = new System.Drawing.Point(244, 14);
+      this.lbl_SearchInText.Location = new System.Drawing.Point(244, 18);
       this.lbl_SearchInText.Name = "lbl_SearchInText";
       this.lbl_SearchInText.Size = new System.Drawing.Size(79, 13);
       this.lbl_SearchInText.TabIndex = 9;
@@ -144,9 +146,9 @@ namespace Frog
       // 
       this.tb_SearchInText.Anchor = ((System.Windows.Forms.AnchorStyles)((System.Windows.Forms.AnchorStyles.Bottom | System.Windows.Forms.AnchorStyles.Left)));
       this.tb_SearchInText.Font = new System.Drawing.Font("MS Gothic", 14.25F, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point, ((byte)(0)));
-      this.tb_SearchInText.Location = new System.Drawing.Point(247, 30);
+      this.tb_SearchInText.Location = new System.Drawing.Point(247, 34);
       this.tb_SearchInText.Name = "tb_SearchInText";
-      this.tb_SearchInText.Size = new System.Drawing.Size(250, 26);
+      this.tb_SearchInText.Size = new System.Drawing.Size(218, 26);
       this.tb_SearchInText.TabIndex = 10;
       // 
       // lb_Lines
@@ -205,6 +207,14 @@ namespace Frog
       this.tb_Notes.ScrollBars = System.Windows.Forms.ScrollBars.Vertical;
       this.tb_Notes.Size = new System.Drawing.Size(614, 193);
       this.tb_Notes.TabIndex = 8;
+      // 
+      // previewControl
+      // 
+      this.previewControl.BackColor = System.Drawing.SystemColors.ActiveCaptionText;
+      this.previewControl.Location = new System.Drawing.Point(9, 299);
+      this.previewControl.Name = "previewControl";
+      this.previewControl.Size = new System.Drawing.Size(576, 96);
+      this.previewControl.TabIndex = 4;
       // 
       // lbl_Text
       // 
@@ -292,7 +302,7 @@ namespace Frog
       // 
       this.label1.Anchor = ((System.Windows.Forms.AnchorStyles)((System.Windows.Forms.AnchorStyles.Bottom | System.Windows.Forms.AnchorStyles.Left)));
       this.label1.AutoSize = true;
-      this.label1.Location = new System.Drawing.Point(500, 14);
+      this.label1.Location = new System.Drawing.Point(468, 18);
       this.label1.Name = "label1";
       this.label1.Size = new System.Drawing.Size(110, 13);
       this.label1.TabIndex = 11;
@@ -302,7 +312,7 @@ namespace Frog
       // 
       this.tb_SearchInTranslation.Anchor = ((System.Windows.Forms.AnchorStyles)((System.Windows.Forms.AnchorStyles.Bottom | System.Windows.Forms.AnchorStyles.Left)));
       this.tb_SearchInTranslation.Font = new System.Drawing.Font("MS Gothic", 14.25F, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point, ((byte)(0)));
-      this.tb_SearchInTranslation.Location = new System.Drawing.Point(503, 30);
+      this.tb_SearchInTranslation.Location = new System.Drawing.Point(471, 34);
       this.tb_SearchInTranslation.Name = "tb_SearchInTranslation";
       this.tb_SearchInTranslation.Size = new System.Drawing.Size(250, 26);
       this.tb_SearchInTranslation.TabIndex = 12;
@@ -311,6 +321,8 @@ namespace Frog
       // 
       this.gb_Footer.Anchor = ((System.Windows.Forms.AnchorStyles)(((System.Windows.Forms.AnchorStyles.Bottom | System.Windows.Forms.AnchorStyles.Left) 
             | System.Windows.Forms.AnchorStyles.Right)));
+      this.gb_Footer.Controls.Add(this.cb_FilterUntranslated);
+      this.gb_Footer.Controls.Add(this.cb_FilterErrors);
       this.gb_Footer.Controls.Add(this.cb_SixLetterNames);
       this.gb_Footer.Controls.Add(this.lbl_UsefulGlyphs);
       this.gb_Footer.Controls.Add(this.label1);
@@ -320,28 +332,42 @@ namespace Frog
       this.gb_Footer.Controls.Add(this.tb_UsefulGlyphs);
       this.gb_Footer.Location = new System.Drawing.Point(12, 656);
       this.gb_Footer.Name = "gb_Footer";
-      this.gb_Footer.Size = new System.Drawing.Size(895, 61);
+      this.gb_Footer.Size = new System.Drawing.Size(895, 70);
       this.gb_Footer.TabIndex = 13;
       this.gb_Footer.TabStop = false;
-      // 
-      // previewControl
-      // 
-      this.previewControl.BackColor = System.Drawing.SystemColors.ActiveCaptionText;
-      this.previewControl.Location = new System.Drawing.Point(9, 299);
-      this.previewControl.Name = "previewControl";
-      this.previewControl.Size = new System.Drawing.Size(576, 96);
-      this.previewControl.TabIndex = 4;
       // 
       // cb_SixLetterNames
       // 
       this.cb_SixLetterNames.Anchor = ((System.Windows.Forms.AnchorStyles)((System.Windows.Forms.AnchorStyles.Bottom | System.Windows.Forms.AnchorStyles.Left)));
       this.cb_SixLetterNames.AutoSize = true;
-      this.cb_SixLetterNames.Location = new System.Drawing.Point(759, 35);
+      this.cb_SixLetterNames.Location = new System.Drawing.Point(751, 12);
       this.cb_SixLetterNames.Name = "cb_SixLetterNames";
       this.cb_SixLetterNames.Size = new System.Drawing.Size(133, 17);
       this.cb_SixLetterNames.TabIndex = 10;
       this.cb_SixLetterNames.Text = "Assume 6-Letter Name";
       this.cb_SixLetterNames.UseVisualStyleBackColor = true;
+      // 
+      // cb_FilterErrors
+      // 
+      this.cb_FilterErrors.Anchor = ((System.Windows.Forms.AnchorStyles)((System.Windows.Forms.AnchorStyles.Bottom | System.Windows.Forms.AnchorStyles.Left)));
+      this.cb_FilterErrors.AutoSize = true;
+      this.cb_FilterErrors.Location = new System.Drawing.Point(751, 31);
+      this.cb_FilterErrors.Name = "cb_FilterErrors";
+      this.cb_FilterErrors.Size = new System.Drawing.Size(76, 17);
+      this.cb_FilterErrors.TabIndex = 13;
+      this.cb_FilterErrors.Text = "Find Errors";
+      this.cb_FilterErrors.UseVisualStyleBackColor = true;
+      // 
+      // cb_FindUntranslated
+      // 
+      this.cb_FilterUntranslated.Anchor = ((System.Windows.Forms.AnchorStyles)((System.Windows.Forms.AnchorStyles.Bottom | System.Windows.Forms.AnchorStyles.Left)));
+      this.cb_FilterUntranslated.AutoSize = true;
+      this.cb_FilterUntranslated.Location = new System.Drawing.Point(751, 49);
+      this.cb_FilterUntranslated.Name = "cb_FindUntranslated";
+      this.cb_FilterUntranslated.Size = new System.Drawing.Size(109, 17);
+      this.cb_FilterUntranslated.TabIndex = 14;
+      this.cb_FilterUntranslated.Text = "Find Untranslated";
+      this.cb_FilterUntranslated.UseVisualStyleBackColor = true;
       // 
       // DialogEditor
       // 
@@ -396,5 +422,7 @@ namespace Frog
     private System.Windows.Forms.TextBox tb_Notes;
     private System.Windows.Forms.GroupBox gb_Footer;
     private System.Windows.Forms.CheckBox cb_SixLetterNames;
+    private System.Windows.Forms.CheckBox cb_FilterUntranslated;
+    private System.Windows.Forms.CheckBox cb_FilterErrors;
   }
 }

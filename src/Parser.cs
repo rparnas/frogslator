@@ -203,14 +203,16 @@ namespace Frog
 
     static List<Line> GetDialogBlockLines(byte[] rom)
     {
-      byte[] Compose(Line line, Translation translation)
+      byte[] Compose(Line line, Translation translation, out string error)
       {
         if (translation.Skip)
         {
+          error = null;
           return line.Header.Concat(new byte[] { 0x00, 0x00 }).Concat(line.Footer).ToArray();
         }
         if (translation.Text == "")
         {
+          error = null;
           return line.AllBytes;
         }
 
@@ -227,7 +229,8 @@ namespace Frog
             var closeIndex = translation.Text.IndexOf(']', i);
             if (closeIndex < 0)
             {
-              throw new NotImplementedException();
+              error = "unmatched square bracket";
+              return null;
             }
 
             var controlCode = translation.Text.Substring(i, closeIndex - i + 1);
@@ -239,7 +242,7 @@ namespace Frog
             }
 
             // Express the control code.
-            var match = ControlCodes.Any(pair => pair.Value == controlCode) ? Parser.ControlCodes.Single(pair => pair.Value == controlCode).Key : null;
+            var match = ControlCodes.Any(pair => pair.Value == controlCode) ? ControlCodes.Single(pair => pair.Value == controlCode).Key : null;
             if (controlCode.StartsWith("[Text Speed"))
             {
               var byte2 = byte.Parse(controlCode.Substring("[Text Speed ".Length, controlCode.Length - "[Text Speed ".Length - 1), NumberStyles.AllowHexSpecifier);
@@ -252,7 +255,8 @@ namespace Frog
             }
             else if (match == null)
             {
-              throw new NotImplementedException();
+              error = $"unknown control code '{controlCode}'";
+              return null;
             }
             else
             {
@@ -272,16 +276,27 @@ namespace Frog
           }
           else if (mode == "[Latin]")
           {
+            if (!ReverseLatin.ContainsKey(c))
+            {
+              error = $"invalid latin character '{c}'";
+              return null;
+            }
             ret.Add(ReverseLatin[c]);
           }
           else
           {
+            if (!ReverseLatinJumbo.ContainsKey(c))
+            {
+              error = $"invalid latin jumbo character '{c}'";
+              return null;
+            }
             ret.Add(ReverseLatinJumbo[c]);
           }
         }
 
         ret.AddRange(line.Footer);
 
+        error = null;
         return ret.ToArray();
       }
 
@@ -422,7 +437,7 @@ namespace Frog
 
     static List<Line> GetDiaryLines(byte[] rom)
     {
-      byte[] Compose(Line line, Translation translation)
+      byte[] Compose(Line line, Translation translation, out string error)
       {
         var bytes = new List<byte>();
 
@@ -436,6 +451,11 @@ namespace Frog
           }
           else
           {
+            if (!ReverseLatin.ContainsKey(c))
+            {
+              error = $"invalid latin character '{c}'";
+              return null;
+            }
             bytes.Add(ReverseLatin[c]);
           }
         }
@@ -446,6 +466,8 @@ namespace Frog
           processedBytes.Add(0x00);
           processedBytes.Add(bytes[i]);
         }
+
+        error = null;
         return processedBytes.ToArray();
       }
 
@@ -484,7 +506,7 @@ namespace Frog
 
     static List<Line> GetNamingLines(byte[] rom)
     {
-      byte[] Compose(Line line, Translation translation)
+      byte[] Compose(Line line, Translation translation, out string error)
       {
         var bytes = new List<byte>();
 
@@ -499,9 +521,16 @@ namespace Frog
           }
           else
           {
+            if (!ReverseLatinNaming.ContainsKey(c))
+            {
+              error = $"invalid naming character '{c}'";
+              return null;
+            }
             bytes.Add(ReverseLatinNaming[c]);
           }
         }
+
+        error = null;
         return bytes.ToArray();
       }
 
@@ -539,7 +568,7 @@ namespace Frog
 
     static List<Line> GetTitleScreenLines(byte[] rom)
     {
-      byte[] Compose(Line line, Translation translation)
+      byte[] Compose(Line line, Translation translation, out string error)
       {
         var bytes = new List<byte>();
 
@@ -554,9 +583,16 @@ namespace Frog
           }
           else
           {
+            if (!ReverseLatinOpening.ContainsKey(c))
+            {
+              error = $"invalid latin opening character '{c}'";
+              return null;
+            }
             bytes.Add(ReverseLatinOpening[c]);
           }
         }
+
+        error = null;
         return bytes.ToArray();
       }
 

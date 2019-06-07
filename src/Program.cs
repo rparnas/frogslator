@@ -8,19 +8,17 @@ using System.Reflection;
 using System.Text;
 using System.Windows.Forms;
 
-[assembly: AssemblyVersion("1.0.2.0")]
-[assembly: AssemblyFileVersion("1.0.2.0")]
+[assembly: AssemblyVersion("1.1.0.0")]
+[assembly: AssemblyFileVersion("1.1.0.0")]
 
 namespace Frog
 {
   static class Program
   {
-    public static string ExecutableDirectory => new FileInfo(Application.ExecutablePath).Directory.FullName;
-    public static int BlockMaxSize = 0x4000;
     public static List<GameBoyTile> FontBitmaps;
     public static byte[] Grahpics_TitleScreen;
     public static byte[] Graphics_Font;
-    public static bool IsRuning;
+    public static int MaxBlockSize = 0x4000;
     public static Color[] Palette;
     public static string ROMFilter => "GameBoy File(*.gb)|*.gb";
     public static string TranslationFilter => "Frog File (*.frog)|*.frog";
@@ -114,7 +112,6 @@ namespace Frog
       var ret = new List<Translation>();
       var translation = (Translation)null;
       var target = (Action<string>)null;
-      var noteIndex = 0;
 
       foreach (var line in File.ReadAllLines(path))
       {
@@ -123,8 +120,6 @@ namespace Frog
           translation = new Translation(int.Parse(line.Substring("Address: 0x".Length), System.Globalization.NumberStyles.AllowHexSpecifier));
           ret.Add(translation);
           target = null;
-
-          noteIndex = 0;
         }
         else if (line.StartsWith("Text: "))
         {
@@ -158,31 +153,42 @@ namespace Frog
         return;
       }
 
-      SaveROMToDisk(path, rom, lines);
+      SaveROMToDisk(path, rom, lines, out string error);
+      if (error != null)
+      {
+        MessageBox.Show("Could not save ROM because at least one line has an error:\r\n" + error);
+      }
     }
 
-    public static void SaveROMToDisk(string path, byte[] rom, List<Line> lines)
+    public static void SaveROMToDisk(string path, byte[] rom, List<Line> lines, out string error)
     {
       var newROM = rom.ToArray();
 
-      void WriteDialog(int blockOffset, int newBlockOffset, int startDATIndex, int stopDATIndex)
+      void WriteDialog(int blockOffset, int newBlockOffset, int startDATIndex, int stopDATIndex, out string dialogError)
       {
-        int romIndex = newBlockOffset;
-        int lineIndex = 0;
+        var romIndex = newBlockOffset;
+        var lineIndex = 0;
 
-        // Get to the first line of this block offset
+        // Get to the first line of this block.
         while (lines[lineIndex].DialogAddressTableLocation < startDATIndex)
         {
           lineIndex++;
         }
 
+        // For each line in this block.
         while (lineIndex < lines.Count && lines[lineIndex].DialogAddressTableLocation <= stopDATIndex)
         {
           var l = lines[lineIndex];
           var newAddress = romIndex;
 
           // Add this line to the Dialog Block
-          foreach (var b in l.Compose())
+          var bytes = l.Compose(out string e);
+          if (!string.IsNullOrWhiteSpace(e))
+          {
+            dialogError = "0x" + l.Address.ToString("X2") + " -- " + e;
+            return;
+          }
+          foreach (var b in bytes)
           {
             if (romIndex < newROM.Length)
             {
@@ -204,6 +210,8 @@ namespace Frog
           }
           lineIndex++;
         }
+
+        dialogError = null;
       }
 
       // Change the text table for the opening screen.
@@ -223,34 +231,43 @@ namespace Frog
         newROM[i] = 0xFF;
       }
 
-      // Change the title graphic.
+      // Change the title graphics.
       for (int i = 0x4D770; i < 0x4DD10; i++)
       {
         newROM[i] = Grahpics_TitleScreen[i - 0x4D770];
       }
 
-      // Change the font graphic.
+      // Change the font graphics.
       for (int i = 0x50000; i < 0x52000; i++)
       {
         newROM[i] = Graphics_Font[i - 0x50000];
       }
 
       // Block 1
-      WriteDialog(0x70000, 0x70000, 0, 556);
+      WriteDialog(0x70000, 0x70000, 0, 556, out error);
+      if (error != null) { return; }
 
       // Block 2
-      WriteDialog(0x74000, 0x74000, 557, 889);
+      WriteDialog(0x74000, 0x74000, 557, 889, out error);
+      if (error != null) { return; }
 
       // Block 3
-      WriteDialog(0x78000, 0x78000, 890, 1621);
+      WriteDialog(0x78000, 0x78000, 890, 1621, out error);
+      if (error != null) { return; }
 
       // Block 4
-      WriteDialog(0x7C000, 0x7C000, 1622, 2332);
+      WriteDialog(0x7C000, 0x7C000, 1622, 2332, out error);
+      if (error != null) { return; }
 
       // Title, Naming, Diary
       foreach (var line in lines.Where(l => l.Block == -1))
       {
-        var newBytes = line.Compose();
+        var newBytes = line.Compose(out error);
+        if (error != null)
+        {
+          error = "0x" + line.Address.ToString("X2") + " -- " + error;
+          return;
+        }
         for (int i = 0; i < newBytes.Length; i++)
         {
           newROM[line.Address + i] = newBytes[i];
@@ -282,8 +299,14 @@ namespace Frog
         {
           sb.AppendLine($"Skip: TRUE");
         }
-        sb.AppendLine($"Text: {t.Text}");
-        sb.AppendLine($"Note: {t.Notes}");
+        if (!string.IsNullOrWhiteSpace(t.Text))
+        {
+          sb.AppendLine($"Text: {t.Text}");
+        }
+        if (!string.IsNullOrWhiteSpace(t.Notes))
+        {
+          sb.AppendLine($"Note: {t.Notes}");
+        }
       }
 
       File.WriteAllText(path, sb.ToString());
@@ -292,8 +315,6 @@ namespace Frog
     [STAThread]
     static void Main()
     {
-      IsRuning = true;
-
       Application.EnableVisualStyles();
       Application.SetCompatibleTextRenderingDefault(false);
 
