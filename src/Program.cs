@@ -1,10 +1,10 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Data;
+using System.Drawing;
 using System.IO;
 using System.Linq;
 using System.Reflection;
-using System.Runtime.Serialization.Formatters.Binary;
 using System.Text;
 using System.Windows.Forms;
 
@@ -17,10 +17,11 @@ namespace Frog
   {
     public static string ExecutableDirectory => new FileInfo(Application.ExecutablePath).Directory.FullName;
     public static int BlockMaxSize = 0x4000;
-    public static bool IsRuning;
+    public static List<GameBoyTile> FontBitmaps;
     public static byte[] Grahpics_TitleScreen;
     public static byte[] Graphics_Font;
-    public static string ResourcesDirectory => new DirectoryInfo(ExecutableDirectory + "\\resources\\").FullName;
+    public static bool IsRuning;
+    public static Color[] Palette;
     public static string ROMFilter => "GameBoy File(*.gb)|*.gb";
     public static string TranslationFilter => "Frog File (*.frog)|*.frog";
 
@@ -303,8 +304,20 @@ namespace Frog
       }
 
       // Parse the lines of the DialogBlock from the ROM image.
-      Grahpics_TitleScreen = File.ReadAllBytes(ResourcesDirectory + "Graphics_TitleScreen.gb");
-      Graphics_Font = File.ReadAllBytes(ResourcesDirectory + "Graphics_Font.gb");
+      Grahpics_TitleScreen = File.ReadAllBytes("Graphics_TitleScreen.gb");
+      Graphics_Font = File.ReadAllBytes("Graphics_Font.gb");
+      Palette = new Color[] 
+      {
+        Color.FromArgb(255, 255, 255),
+        Color.FromArgb(168, 168, 168),
+        Color.FromArgb(96, 96, 96),
+        Color.FromArgb(0, 0, 0),
+      };
+      FontBitmaps = new List<GameBoyTile>();
+      for (int i = 0x0; i < Graphics_Font.Length; i += 0x10)
+      {
+        FontBitmaps.Add(new GameBoyTile(Graphics_Font, i, Palette, 4));
+      }
 
       // Parse text from the ROM.
       var lines = Parser.GetLines(rom);

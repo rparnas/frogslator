@@ -8,17 +8,17 @@ namespace Frog
 {
   public static class Parser
   {
-    static readonly Dictionary<byte?[], string> ControlCodes;
-    static readonly char[] LatinDialog;
-    static readonly char[] LatinNaming;
-    static readonly char[] LatinOpening;
-    static readonly char[] LatinJumbo;
-    static readonly char[] Japanese;
-    static readonly char[] JapaneseJumbo;
-    static readonly Dictionary<char, byte> ReverseLatin;
-    static readonly Dictionary<char, byte> ReverseLatinNaming;
-    static readonly Dictionary<char, byte> ReverseLatinOpening;
-    static readonly Dictionary<char, byte> ReverseLatinJumbo;
+    public static readonly Dictionary<byte?[], string> ControlCodes;
+    public static readonly char[] LatinDialog;
+    public static readonly char[] LatinNaming;
+    public static readonly char[] LatinOpening;
+    public static readonly char[] LatinJumbo;
+    public static readonly char[] Japanese;
+    public static readonly char[] JapaneseJumbo;
+    public static readonly Dictionary<char, byte> ReverseLatin;
+    public static readonly Dictionary<char, byte> ReverseLatinNaming;
+    public static readonly Dictionary<char, byte> ReverseLatinOpening;
+    public static readonly Dictionary<char, byte> ReverseLatinJumbo;
 
     static Parser()
     {

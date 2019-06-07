@@ -52,6 +52,7 @@
     <Compile Include="DialogEditor.Designer.cs">
       <DependentUpon>DialogEditor.cs</DependentUpon>
     </Compile>
+    <Compile Include="GameBoyTile.cs" />
     <Compile Include="GraphicsControl.cs">
       <SubType>UserControl</SubType>
     </Compile>
@@ -97,7 +98,8 @@
   </ItemGroup>
   <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />
   <PropertyGroup>
-    <PreBuildEvent>XCOPY "$(SolutionDir)..\resources" "$(TargetDir)resources" /s /i /y</PreBuildEvent>
+    <PreBuildEvent>XCOPY "$(SolutionDir)Graphics_Font.gb" "$(TargetDir)" /y
+XCOPY "$(SolutionDir)Graphics_TitleScreen.gb" "$(TargetDir)" /y</PreBuildEvent>
   </PropertyGroup>
   <!-- To modify your build process, add your task inside one of the targets below and uncomment it. 
        Other similar extension points exist, see Microsoft.Common.targets.

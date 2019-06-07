@@ -49,11 +49,21 @@ namespace Frog
         })
       });
 
-      btn_PreviewDown.Click += (s, e) => DisplayPreview(previewControl.PageIndex + 1, SelectedLine);
+      btn_PreviewDown.Click += (s, e) =>
+      {
+        previewControl.SetPage(previewControl.PageIndex + 1);
+        btn_PreviewDown.Enabled = previewControl.PageIndex < previewControl.PageCount - 1;
+        btn_PreviewUp.Enabled = previewControl.PageIndex > 0;
+      };
 
-      btn_PreviewUp.Click += (s, e) => DisplayPreview(previewControl.PageIndex - 1, SelectedLine);
+      btn_PreviewUp.Click += (s, e) =>
+      {
+        previewControl.SetPage(previewControl.PageIndex - 1);
+        btn_PreviewDown.Enabled = previewControl.PageIndex < previewControl.PageCount - 1;
+        btn_PreviewUp.Enabled = previewControl.PageIndex > 0;
+      };
 
-      cb_SixLetterNames.CheckedChanged += (s, e) => DisplayLine(SelectedLine);
+      cb_SixLetterNames.CheckedChanged += (s, e) => DisplayPreview(false, SelectedLine);
 
       cb_Skip.CheckedChanged += (s, e) =>
       {
@@ -96,7 +106,7 @@ namespace Frog
         }
 
         lbl_Translation.Text = $"Translation ({newLen} bytes):";
-        DisplayPreview(previewControl.PageIndex, SelectedLine);
+        DisplayPreview(false, SelectedLine);
       };
 
       BringToFront();
@@ -132,7 +142,7 @@ namespace Frog
         tb_Text.Text = line.Text.Replace("\n", "\r\n");
         tb_Translation.Text = line.Translation.Text.Replace("\n", "\r\n");
       }
-      DisplayPreview(0, line);
+      DisplayPreview(true, line);
     }
 
     void DisplayLines(List<Line> lines)
@@ -163,11 +173,11 @@ namespace Frog
       DisplayFreeSpace();
     }
 
-    void DisplayPreview(int page, Line line)
+    void DisplayPreview(bool reset, Line line)
     {
       if (line == null)
       {
-        previewControl.Setup(0, 1, 1, "");
+        previewControl.Setup(true, 1, 1, "");
         return;
       }
 
@@ -175,7 +185,7 @@ namespace Frog
       text = text.Replace("[Text Name]", cb_SixLetterNames.Checked ? "~Name~" : "NAME");
       text = Regex.Replace(text, "(\\[.*\\])", "");
 
-      previewControl.Setup(page, line.BoxHeight, line.BoxWidth, text);
+      previewControl.Setup(reset, line.BoxHeight, line.BoxWidth, text);
 
       btn_PreviewUp.Enabled = previewControl.PageIndex > 0;
       btn_PreviewDown.Enabled = previewControl.PageIndex < previewControl.PageCount - 1;

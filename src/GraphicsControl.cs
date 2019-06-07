@@ -8,7 +8,6 @@ namespace Frog
 {
   public partial class GraphicsControl : UserControl
   {
-    Dictionary<char, Bitmap> Letters;
     List<List<string>> Pages;
     public int PageIndex { get; private set; }
     public int PageCount => Pages.Count;
@@ -23,6 +22,7 @@ namespace Frog
       }
 
       InitializeComponent();
+      DoubleBuffered = true;
 
       Paint += (s, e) =>
       {
@@ -34,39 +34,30 @@ namespace Frog
           for (var col = 0; col < Cols; col++)
           {
             var c = col < line.Length ? line[col] : ' ';
-            e.Graphics.DrawImage(Letters.ContainsKey(c) ? Letters[c] : Letters['?'], new Point(32 * col, 32 * row));
+            var i = c == ' ' ? 79 :
+                    Parser.ReverseLatin.ContainsKey(c) ? Parser.ReverseLatin[c] : 
+                    Parser.ReverseLatin['?'];
+            var bmp = Program.FontBitmaps[i];
+            e.Graphics.DrawImage(bmp.Bitmap, new Point(32 * col, 32 * row));
           }
         }
       };
 
-      // Load Graphics
-      Letters = new Dictionary<char, Bitmap>();
-      var lower = new DirectoryInfo(Program.ResourcesDirectory + "Graphics\\Text").GetFiles("*.jpg");
-      var capital = new DirectoryInfo(Program.ResourcesDirectory + "Graphics\\Text\\Cap").GetFiles("*.jpg");
-      foreach (FileInfo file in lower.Concat(capital))
-      {
-        string name = file.Name.Replace(".jpg", "");
-        char c = name[0];
-        if (name.Equals("question"))
-        {
-          c = '?';
-        }
-        else if (name.Equals("quote"))
-        {
-          c = '\"';
-        }
-        else if (name.Equals("space"))
-        {
-          c = ' ';
-        }
-        Letters.Add(c, new Bitmap(file.DirectoryName + "\\" + file.Name));
-      }
       PageIndex = 0;
       Pages = new List<List<string>> { new List<string> { "" } };
     }
 
-    public void Setup(int pageIndex, int rows, int cols, string text)
+    public void SetPage(int pageIndex)
     {
+      PageIndex = pageIndex;
+
+      Refresh();
+    }
+
+    public void Setup(bool reset, int rows, int cols, string text)
+    {
+      var oldPages = Pages.Count;
+
       var pages = new List<List<string>> { new List<string> { "" } };
 
       void newline()
@@ -96,8 +87,13 @@ namespace Frog
         pages.Last()[pages.Last().Count - 1] += c;
       }
 
+      var newPages = pages.Count;
+
       Cols = cols;
-      PageIndex = pageIndex < pages.Count ? pageIndex : pages.Count - 1;
+      PageIndex = reset ? 0 :
+                  newPages > oldPages && PageIndex == oldPages - 1 ? newPages - 1 :
+                  newPages < oldPages && PageIndex == oldPages - 1 ? newPages - 1 :
+                  PageIndex;
       Pages = pages;
       Rows = rows;
       Size = new Size(32 * cols, 32 * rows);
