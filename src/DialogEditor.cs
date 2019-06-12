@@ -143,11 +143,11 @@ namespace Frog
       // Add lines and filter.
       foreach (var line in lines)
       {
-        if (!string.IsNullOrWhiteSpace(tb_SearchInText.Text) && !line.Text.Contains(tb_SearchInText.Text))
+        if (!string.IsNullOrEmpty(tb_SearchInText.Text) && !line.Text.Contains(tb_SearchInText.Text))
         {
           continue;
         }
-        if (!string.IsNullOrWhiteSpace(tb_SearchInTranslation.Text) && !line.Translation.Text.Contains(tb_SearchInTranslation.Text))
+        if (!string.IsNullOrEmpty(tb_SearchInTranslation.Text) && !line.Translation.Text.Contains(tb_SearchInTranslation.Text))
         {
           continue;
         }
