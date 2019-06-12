@@ -26,12 +26,12 @@ namespace Frog {
         [global::System.Configuration.UserScopedSettingAttribute()]
         [global::System.Diagnostics.DebuggerNonUserCodeAttribute()]
         [global::System.Configuration.DefaultSettingValueAttribute("")]
-        public string LastROMPath {
+        public string LastLoadROMPath {
             get {
-                return ((string)(this["LastROMPath"]));
+                return ((string)(this["LastLoadROMPath"]));
             }
             set {
-                this["LastROMPath"] = value;
+                this["LastLoadROMPath"] = value;
             }
         }
         
@@ -44,6 +44,18 @@ namespace Frog {
             }
             set {
                 this["LastTranslationPath"] = value;
+            }
+        }
+        
+        [global::System.Configuration.UserScopedSettingAttribute()]
+        [global::System.Diagnostics.DebuggerNonUserCodeAttribute()]
+        [global::System.Configuration.DefaultSettingValueAttribute("")]
+        public string LastSaveROMPath {
+            get {
+                return ((string)(this["LastSaveROMPath"]));
+            }
+            set {
+                this["LastSaveROMPath"] = value;
             }
         }
     }

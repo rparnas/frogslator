@@ -23,12 +23,22 @@ namespace Frog
     public static string ROMFilter => "GameBoy File(*.gb)|*.gb";
     public static string TranslationFilter => "Frog File (*.frog)|*.frog";
 
-    public static string LastROMPath
+    public static string LastLoadROMPath
     {
-      get => Settings.Default.LastROMPath;
+      get => Settings.Default.LastLoadROMPath;
       set
       {
-        Settings.Default.LastROMPath = value;
+        Settings.Default.LastLoadROMPath = value;
+        Settings.Default.Save();
+      }
+    }
+
+    public static string LastSaveROMPath
+    {
+      get => Settings.Default.LastSaveROMPath;
+      set
+      {
+        Settings.Default.LastSaveROMPath = value;
         Settings.Default.Save();
       }
     }
@@ -68,7 +78,7 @@ namespace Frog
 
     public static byte[] LoadROMFromDisk()
     {
-      var path = DoFileDialog(new OpenFileDialog(), "Choose a valid Japanese Kaeru no Tame ni Kane Wa Naru ROM", ROMFilter, () => LastROMPath, p => LastROMPath = p);
+      var path = DoFileDialog(new OpenFileDialog(), "Choose a valid Japanese Kaeru no Tame ni Kane Wa Naru ROM", ROMFilter, () => LastLoadROMPath, p => LastLoadROMPath = p);
       if (path == null)
       {
         return null;
@@ -157,7 +167,7 @@ namespace Frog
 
     public static void SaveROMToDisk(byte[] rom, List<Line> lines)
     {
-      var path = DoFileDialog(new SaveFileDialog(), "Save ROM", ROMFilter, () => LastROMPath, p => LastROMPath = p);
+      var path = DoFileDialog(new SaveFileDialog(), "Save ROM", ROMFilter, () => LastSaveROMPath, p => LastSaveROMPath = p);
       if (path == null)
       {
         return;
@@ -331,9 +341,9 @@ namespace Frog
       var rom = (byte[])null;
       var lines = (List<Line>)null;
 
-      if (File.Exists(LastROMPath) && File.Exists(LastTranslationPath) && MessageBox.Show("Reload last open Japanese ROM and translation?", "Reload?", MessageBoxButtons.YesNo) == DialogResult.Yes)
+      if (File.Exists(LastLoadROMPath) && File.Exists(LastTranslationPath) && MessageBox.Show("Reload last open Japanese ROM and translation?", "Reload?", MessageBoxButtons.YesNo) == DialogResult.Yes)
       {
-        rom = LoadROMFromDisk(LastROMPath, out string loadROMError);
+        rom = LoadROMFromDisk(LastLoadROMPath, out string loadROMError);
         if (loadROMError != null)
         {
           MessageBox.Show(loadROMError);
