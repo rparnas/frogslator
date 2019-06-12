@@ -86,7 +86,7 @@ namespace Frog
       this.tb_UsefulGlyphs.ReadOnly = true;
       this.tb_UsefulGlyphs.Size = new System.Drawing.Size(224, 29);
       this.tb_UsefulGlyphs.TabIndex = 8;
-      this.tb_UsefulGlyphs.Text = "▲ ▼ ◄ ► ♥ ‥ …";
+      this.tb_UsefulGlyphs.Text = "▲ ▼ ◄ ► ♥ ‥ … ‘ “";
       // 
       // lbl_Block3Bytes
       // 
