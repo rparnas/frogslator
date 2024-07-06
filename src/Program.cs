@@ -200,33 +200,25 @@ static class Program
   {
     var newROM = rom.ToArray();
 
-    void WriteDialog(int blockOffset, int newBlockOffset, int startDATIndex, int stopDATIndex, out string? dialogError)
+    void WriteDialog(int block, int blockOffset, int newBlockOffset, out string? dialogError)
     {
       var romIndex = newBlockOffset;
-      var lineIndex = 0;
-
-      // Get to the first line of this block.
-      while (lines[lineIndex].DialogAddressTableLocation < startDATIndex)
-      {
-        lineIndex++;
-      }
 
       // For each line in this block.
-      while (lineIndex < lines.Count && lines[lineIndex].DialogAddressTableLocation <= stopDATIndex)
+      foreach (var l in lines.Where(line => line.Block == block))
       {
-        var l = lines[lineIndex];
         var newAddress = romIndex;
 
         // Add this line to the Dialog Block
-        var bytes = l.Compose(out var e);
-        if (bytes is null)
+        var newBytes = l.Compose(out var e);
+        if (newBytes is null)
         {
           dialogError = $@"0x{l.Address:X2} -- {(e is null ? "Unknown" : e)}";
           return;
         }
         else
         {
-          foreach (var b in bytes)
+          foreach (var b in newBytes)
           {
             if (romIndex < newROM.Length)
             {
@@ -237,17 +229,17 @@ static class Program
         }
 
         // Set references to this line in the DialogAddressTable
-        for (int datIndex = l.DialogAddressTableLocation; datIndex < (lineIndex == lines.Count - 1 ? 2333 : lines[lineIndex + 1].DialogAddressTableLocation); datIndex++)
+        // 0 ~ 556 | 557 ~ 889 | 890 ~ 1621 | 1622 ~ 2332
+        var offset = (newAddress - newBlockOffset).ToString("x").ToUpper();
+        while (offset.Length < 4)
         {
-          var offset = (newAddress - newBlockOffset).ToString("x").ToUpper();
-          while (offset.Length < 4)
-          {
-            offset = "0" + offset;
-          }
-          newROM[(datIndex * 2) + 0x1CB2E] = byte.Parse(offset.Substring(2, 2), System.Globalization.NumberStyles.AllowHexSpecifier);
+          offset = "0" + offset;
+        }
+        foreach (var datIndex in l.DialogAddressTableLocations)
+        {
+          newROM[(datIndex * 2) + 0x1CB2E    ] = byte.Parse(offset.Substring(2, 2), System.Globalization.NumberStyles.AllowHexSpecifier);
           newROM[(datIndex * 2) + 0x1CB2E + 1] = byte.Parse(offset.Substring(0, 2), System.Globalization.NumberStyles.AllowHexSpecifier);
         }
-        lineIndex++;
       }
 
       dialogError = null;
@@ -282,24 +274,21 @@ static class Program
       newROM[i] = Graphics_Font[i - 0x50000];
     }
 
-    // Block 1
-    WriteDialog(0x70000, 0x70000, 0, 556, out error);
+    // Dialog
+    WriteDialog(0, 0x70000, 0x70000, out error);
     if (error is not null) { return; }
 
-    // Block 2
-    WriteDialog(0x74000, 0x74000, 557, 889, out error);
+    WriteDialog(1, 0x74000, 0x74000, out error);
     if (error is not null) { return; }
 
-    // Block 3
-    WriteDialog(0x78000, 0x78000, 890, 1621, out error);
+    WriteDialog(2, 0x78000, 0x78000, out error);
     if (error is not null) { return; }
 
-    // Block 4
-    WriteDialog(0x7C000, 0x7C000, 1622, 2332, out error);
+    WriteDialog(3, 0x7C000, 0x7C000, out error);
     if (error is not null) { return; }
 
     // Title, Naming, Diary
-    foreach (var line in lines.Where(l => l.Block == -1))
+    foreach (var line in lines.Where(l => !l.Block.HasValue))
     {
       var newBytes = line.Compose(out error);
       if (newBytes is null)
@@ -363,9 +352,12 @@ static class Program
     if (File.Exists(LastLoadROMPath) && File.Exists(LastTranslationPath) && MessageBox.Show("Reload last open Japanese ROM and translation?", "Reload?", MessageBoxButtons.YesNo) == DialogResult.Yes)
     {
       rom = LoadROMFromDisk(LastLoadROMPath, out var loadROMError);
-      if (loadROMError != null)
+      if (rom is null)
       {
-        MessageBox.Show(loadROMError);
+        if (loadROMError is not null)
+        {
+          MessageBox.Show(loadROMError);
+        }
         return;
       }
 
@@ -376,11 +368,12 @@ static class Program
     else
     {
       rom = LoadROMFromDisk();
-      lines = Parser.GetLines(rom);
-      if (rom == null)
+      if (rom is null)
       {
         return;
       }
+
+      lines = Parser.GetLines(rom);
     }
 
     // Show the dialog editing screen.

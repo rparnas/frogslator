@@ -1,4 +1,6 @@
-﻿namespace Frogslator;
+﻿using System.Text;
+
+namespace Frogslator;
 
 public partial class DialogEditor : Form
 {
@@ -52,9 +54,8 @@ public partial class DialogEditor : Form
       btn_PreviewUp.Enabled = previewControl.PageIndex > 0;
     };
 
-    cb_FilterErrors.CheckedChanged += (s, e) => DisplayLines(lines);
-
-    cb_FilterUntranslated.CheckedChanged += (s, e) => DisplayLines(lines);
+    foreach (var cb in new[] { cb_FilterErrors, cb_FilterUntranslated, cb_FindTrailingWhitespace })
+      cb.CheckedChanged += (s, e) => DisplayLines(lines);
 
     cb_SixLetterNames.CheckedChanged += (s, e) => DisplayPreview(false, SelectedLine);
 
@@ -70,9 +71,8 @@ public partial class DialogEditor : Form
 
     tb_Notes.TextChanged += (s, e) => SelectedLine!.Translation.Notes = tb_Notes.Text.Replace("\r\n", "\n");
 
-    tb_SearchInText.TextChanged += (s, e) => DisplayLines(lines);
-
-    tb_SearchInTranslation.TextChanged += (s, e) => DisplayLines(lines);
+    foreach (var tb in new[] { tb_SearchInNotes, tb_SearchInText, tb_SearchInTranslation })
+      tb.TextChanged += (s, e) => DisplayLines(lines);
 
     tb_Translation.TextChanged += (s, e) =>
     {
@@ -80,16 +80,17 @@ public partial class DialogEditor : Form
       SelectedLine.Translation.Text = tb_Translation.Text.Replace("\r\n", "\n");
       var newBytes = SelectedLine.Compose(out var newBytesError);
 
-      if (SelectedLine.Block >= 0)
+      var block = SelectedLine.Block;
+      if (block.HasValue)
       {
-        BlockSizes[SelectedLine.Block] -= oldBytes?.Length ?? 0;
-        BlockSizes[SelectedLine.Block] += newBytes?.Length ?? 0;
+        BlockSizes[block.Value] -= oldBytes?.Length ?? 0;
+        BlockSizes[block.Value] += newBytes?.Length ?? 0;
         DisplayFreeSpace();
       }
 
       if (!string.IsNullOrEmpty(newBytesError))
       {
-        lbl_Translation.Text = $"Translation -- Error: {newBytesError}";
+        lbl_Translation.Text = $"Translation (Error -- {newBytesError}):";
       }
       else
       {
@@ -124,10 +125,12 @@ public partial class DialogEditor : Form
 
     if (line is not null)
     {
+      var bytesText = line.AllBytes.Length > 0 ? $@" ({line.AllBytes.Length} bytes)" : string.Empty;
+
       cb_Skip.Checked = line.Translation.Skip;
-      cb_Skip.Enabled = line.Block >= 0;
-      gb_Line.Text = "0x" + line.Address.ToString("X2") + (line.Block < 0 ? " (Special Text)" : $" (Dialog Block {line.Block})");
-      lbl_Text.Text = $"Text ({line.AllBytes.Length} bytes):";
+      cb_Skip.Enabled = line.Block.HasValue;
+      gb_Line.Text = $@"0x{line.Address:X2}: {line.Category}";
+      lbl_Text.Text = $@"Text{bytesText}";
       tb_Notes.Text = line.Translation.Notes.Replace("\n", "\r\n");
       tb_Text.Text = line.Text.Replace("\n", "\r\n");
       tb_Translation.Text = line.Translation.Text.Replace("\n", "\r\n");
@@ -143,6 +146,10 @@ public partial class DialogEditor : Form
     // Add lines and filter.
     foreach (var line in lines)
     {
+      if (!string.IsNullOrEmpty(tb_SearchInNotes.Text) && !line.Translation.Notes.Contains(tb_SearchInNotes.Text))
+      {
+        continue;
+      }
       if (!string.IsNullOrEmpty(tb_SearchInText.Text) && !line.Text.Contains(tb_SearchInText.Text))
       {
         continue;
@@ -151,11 +158,15 @@ public partial class DialogEditor : Form
       {
         continue;
       }
+      if (cb_FindTrailingWhitespace.Checked && !GetHasTrailingWhitespace(line.Translation.Text))
+      {
+        continue;
+      }
       if (cb_FilterErrors.Checked && (line.Compose(out var error) != null || error == null))
       {
         continue;
       }
-      if (cb_FilterUntranslated.Checked && !string.IsNullOrEmpty(line.Translation.Text) && !line.Translation.Skip)
+      if (cb_FilterUntranslated.Checked && (string.IsNullOrWhiteSpace(line.Text) || !string.IsNullOrEmpty(line.Translation.Text) || line.Translation.Skip))
       {
         continue;
       }
@@ -224,10 +235,19 @@ public partial class DialogEditor : Form
       BlockSizes[i] = 0;
     }
 
-    foreach (var l in lines.Where(l => l.Block >= 0))
+    foreach (var l in lines)
     {
-      var bytes = l.Compose(out _)?.Length ?? 0;
-      BlockSizes[l.Block] += bytes;
+      var block = l.Block;
+      if (block.HasValue)
+      {
+        var bytes = l.Compose(out _)?.Length ?? 0;
+        BlockSizes[block.Value] += bytes;
+      }
     }
+  }
+
+  static bool GetHasTrailingWhitespace(string text)
+  {
+    return text.TrimEnd() != text;
   }
 }

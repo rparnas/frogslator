@@ -103,7 +103,7 @@ public static class Parser
     /* 0xA_ */ ' ', ' ', ' ', ' ', ' ', ' ', '♥', '&', ' ', ' ', '(', ')', ' ', ' ', ' ', '_',
   ]);
 
-  public static readonly CharacterMap LatinNaming = new CharacterMap(
+  public static readonly CharacterMap LatinNameScreen = new CharacterMap(
   [
     /*          0    1    2    3    4    5    6    7    8    9    A    B    C    D    E    F */
     /* 0x0_ */ ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ',
@@ -116,7 +116,7 @@ public static class Parser
     /* 0x7_ */ '~', '!', '?', '-', '.', '‥', '♥', '&', ',', '.', '(', ')',
   ]);
 
-  public static readonly CharacterMap LatinOpening = new CharacterMap(
+  public static readonly CharacterMap LatinTitleScreen = new CharacterMap(
   [
     /*          0    1    2    3    4    5    6    7    8    9    A    B    C    D    E    F */
     /* 0x0_ */ ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ',
@@ -183,7 +183,7 @@ public static class Parser
     return new List<Line>()
       .Concat(GetDialogBlockLines(rom))
       .Concat(GetDiaryLines(rom))
-      .Concat(GetNamingLines(rom))
+      .Concat(GetNameScreenLines(rom))
       .Concat(GetTitleScreenLines(rom))
       .OrderBy(line => line.Address)
       .ToList();
@@ -220,7 +220,7 @@ public static class Parser
           var closeIndex = translation.Text.IndexOf(']', i);
           if (closeIndex < 0)
           {
-            error = "unmatched square bracket";
+            error = "unmatched square bracket '['";
             return null;
           }
 
@@ -280,7 +280,7 @@ public static class Parser
         {
           if (!LatinDialog.Contains(c))
           {
-            error = $"invalid latin dialog character '{c}'";
+            error = CharacterMapError(nameof(LatinDialog), c);
             return null;
           }
           ret.Add(LatinDialog.GetByte(c));
@@ -289,7 +289,7 @@ public static class Parser
         {
           if (!LatinJumbo.Contains(c))
           {
-            error = $"invalid latin jumbo character '{c}'";
+            error = CharacterMapError(nameof(LatinJumbo), c);
             return null;
           }
           ret.Add(LatinJumbo.GetByte(c));
@@ -431,7 +431,9 @@ public static class Parser
 
       var height = 2;
       var width = address >= 0x70F9B && address <= 0x7217A ? 16 : 18;
-      lines.Add(new Line(address, ResolveDialogAddressTableIndex(lines.Count), height, width, header.ToArray(), body.ToArray(), footer.ToArray(), Parse, Compose));
+      var lastDatLocation = lines.Any() ? lines.Last().DialogAddressTableLocations.Last() : -1;
+      var datLocations = ResolveDialogAddressLocations(address, lastDatLocation);
+      lines.Add(new Line("Dialog", null, address, datLocations, height, width, header.ToArray(), body.ToArray(), footer.ToArray(), Compose, Parse));
     }
 
     return lines;
@@ -441,10 +443,15 @@ public static class Parser
   {
     byte[]? Compose(Line line, Translation translation, out string? error)
     {
-      var bytes = new List<byte>();
+      var fixedLength = line.Text.Length;
+      if (translation.Text.Length > fixedLength)
+      {
+        error = $@"must be {fixedLength*2} bytes or less"; // processing will double the number of bytes
+        return null;
+      }
 
-      var count = line.Text.Length;
-      for (int i = 0; i < count; i++)
+      var bytes = new List<byte>();
+      for (int i = 0; i < fixedLength; i++)
       {
         var c = i >= translation.Text.Length ? ' ' : translation.Text[i];
         if (c == ' ')
@@ -455,7 +462,7 @@ public static class Parser
         {
           if (!LatinDialog.Contains(c))
           {
-            error = $"invalid latin character '{c}'";
+            error = CharacterMapError(nameof(LatinDialog), c);
             return null;
           }
           bytes.Add(LatinDialog.GetByte(c));
@@ -475,46 +482,69 @@ public static class Parser
 
     return new List<Line>
     {
-      new Line(0xE210, -1, 1, 1, new byte[0], new byte[0], new byte[0], bytes => "日記ちょう", Compose),
-      new Line(0xE22E, -1, 1, 1, new byte[0], new byte[0], new byte[0], bytes => "王子", Compose),
-      new Line(0xE234, -1, 1, 1, new byte[0], new byte[0], new byte[0], bytes => "日記ちょう", Compose),
-      new Line(0xE242, -1, 1, 1, new byte[0], new byte[0], new byte[0], bytes => "どの日記で", Compose),
-      new Line(0xE24E, -1, 1, 1, new byte[0], new byte[0], new byte[0], bytes => "はじめますか？", Compose),
-      new Line(0xE25C, -1, 1, 1, new byte[0], new byte[0], new byte[0], bytes => "       ", Compose),
-      new Line(0xE27A, -1, 1, 1, new byte[0], new byte[0], new byte[0], bytes => "どの日記を", Compose),
-      new Line(0xE288, -1, 1, 1, new byte[0], new byte[0], new byte[0], bytes => "けしますか？", Compose),
-      new Line(0xE294, -1, 1, 1, new byte[0], new byte[0], new byte[0], bytes => "       ", Compose),
-      new Line(0xE2B0, -1, 1, 1, new byte[0], new byte[0], new byte[0], bytes => "どうしますか？", Compose),
-      new Line(0xE304, -1, 1, 1, new byte[0], new byte[0], new byte[0], bytes => "どのぺーじからよみますか？ ", Compose),
-      new Line(0xE33E, -1, 1, 1, new byte[0], new byte[0], new byte[0], bytes => "どの日記に", Compose),
-      new Line(0xE34C, -1, 1, 1, new byte[0], new byte[0], new byte[0], bytes => "きろくする？", Compose),
-      new Line(0xE358, -1, 1, 1, new byte[0], new byte[0], new byte[0], bytes => "      ", Compose),
-      new Line(0xE364, -1, 1, 1, new byte[0], new byte[0], new byte[0], bytes => "        ", Compose),
-      new Line(0xE374, -1, 1, 1, new byte[0], new byte[0], new byte[0], bytes => "きろくしました", Compose),
-      new Line(0xE382, -1, 1, 1, new byte[0], new byte[0], new byte[0], bytes => "       ", Compose),
-      new Line(0xE390, -1, 1, 1, new byte[0], new byte[0], new byte[0], bytes => "たびを ", Compose),
-      new Line(0xE39E, -1, 1, 1, new byte[0], new byte[0], new byte[0], bytes => "つづけますか？ ", Compose),
-      new Line(0xE3AE, -1, 1, 1, new byte[0], new byte[0], new byte[0], bytes => "日記けす ", Compose),
-      new Line(0xE3BC, -1, 1, 1, new byte[0], new byte[0], new byte[0], bytes => "もどる ", Compose),
-      new Line(0xE3CA, -1, 1, 1, new byte[0], new byte[0], new byte[0], bytes => "日記つける", Compose),
-      new Line(0xE3E6, -1, 1, 1, new byte[0], new byte[0], new byte[0], bytes => "日記たる", Compose),
-      new Line(0xE402, -1, 1, 1, new byte[0], new byte[0], new byte[0], bytes => "YES", Compose),
-      new Line(0xE41E, -1, 1, 1, new byte[0], new byte[0], new byte[0], bytes => "NO", Compose),
-      new Line(0xE43A, -1, 1, 1, new byte[0], new byte[0], new byte[0], bytes => "____王子", Compose),
-      new Line(0xE456, -1, 1, 1, new byte[0], new byte[0], new byte[0], bytes => "____王子", Compose),
-      new Line(0xE478, -1, 1, 1, new byte[0], new byte[0], new byte[0], bytes => "日め", Compose)
+      new Line("Diary", "Load (Top)",            0xE208, [], 1, 14, [], [], [], Compose, bytes => "    日記ちょう     "),
+                                                 
+      new Line("Diary", "In-Game (Top 1)",       0xE22E, [], 1,  3, [], [], [], Compose, bytes => "王子 "),
+      new Line("Diary", "In-Game (Top 2)",       0xE234, [], 1,  6, [], [], [], Compose, bytes => "日記ちょう "),
+                                            
+      new Line("Diary", "Load (Left 1)",         0xE240, [], 1,  7, [], [], [], Compose, bytes => " どの日記で "),
+      new Line("Diary", "Load (Left 2)",         0xE24E, [], 1,  7, [], [], [], Compose, bytes => "はじめますか？ "),
+      new Line("Diary", "Load (Left 3)",         0xE25C, [], 1,  7, [], [], [], Compose, bytes => "       "),
+      new Line("Diary", "Load (Left 4)",         0xE26A, [], 1,  7, [], [], [], Compose, bytes => "       "),
+      
+      new Line("Diary", "Erase (Left 1)",        0xE278, [], 1,  7, [], [], [], Compose, bytes => " どの日記で "),
+      new Line("Diary", "Erase (Left 2)",        0xE286, [], 1,  7, [], [], [], Compose, bytes => "けしますか？ "),
+      new Line("Diary", "Erase (Left 3)",        0xE294, [], 1,  7, [], [], [], Compose, bytes => "       "),
+      new Line("Diary", "Erase (Left 4)",        0xE2A2, [], 1,  7, [], [], [], Compose, bytes => "       "),
+
+      new Line("Diary", "In-Game (Left 1)",      0xE2B0, [], 1,  7, [], [], [], Compose, bytes => "どうしますか？"),
+      new Line("Diary", "In-Game (Left 2)",      0xE2BE, [], 1,  7, [], [], [], Compose, bytes => "       "),
+      new Line("Diary", "In-Game (Left 3)",      0xE2CC, [], 1,  7, [], [], [], Compose, bytes => "       "),
+      new Line("Diary", "In-Game (Left 4)",      0xE2DA, [], 1,  7, [], [], [], Compose, bytes => "       "),
+
+      new Line("Diary", "Read (Left 1)",         0xE304, [], 1,  7, [], [], [], Compose, bytes => "どのぺーじから"),
+      new Line("Diary", "Read (Left 2)",         0xE312, [], 1,  7, [], [], [], Compose, bytes => "よみますか？ "),
+      new Line("Diary", "Read (Left 3)",         0xE320, [], 1,  7, [], [], [], Compose, bytes => "       "),
+      new Line("Diary", "Read (Left 4)",         0xE32E, [], 1,  7, [], [], [], Compose, bytes => "       "),
+
+      new Line("Diary", "Write (Left 1)",        0xE33C, [], 1, 7, [], [], [], Compose, bytes => " どの日記に "),
+      new Line("Diary", "Write (Left 2)",        0xE34A, [], 1, 7, [], [], [], Compose, bytes => "きろくする？ "),
+      new Line("Diary", "Write (Left 3)",        0xE358, [], 1, 7, [], [], [], Compose, bytes => "       "),
+      new Line("Diary", "Write (Left 4)",        0xE366, [], 1, 7, [], [], [], Compose, bytes => "       "),
+
+      new Line("Diary", "Keep Playing (Left 1)", 0xE374, [], 1, 7, [], [], [], Compose, bytes => "きろくしました"),
+      new Line("Diary", "Keep Playing (Left 2)", 0xE382, [], 1, 7, [], [], [], Compose, bytes => "       "),
+      new Line("Diary", "Keep Playing (Left 3)", 0xE390, [], 1, 7, [], [], [], Compose, bytes => "たびを    "),
+      new Line("Diary", "Keep Playing (Left 4)", 0xE39E, [], 1, 7, [], [], [], Compose, bytes => "つづけますか？"),
+
+      new Line("Diary", "Load (Right)",          0xE3AE, [], 1, 5, [], [], [], Compose, bytes => "日記けす "),
+                                                 
+      new Line("Diary", "In-Game (Right)",       0xE3BC, [], 1, 5, [], [], [], Compose, bytes => "もどる  "),
+      new Line("Diary", "In-Game (Right)",       0xE3CA, [], 1, 5, [], [], [], Compose, bytes => "日記つける"),
+      new Line("Diary", "In-Game (Right)",       0xE3E6, [], 1, 5, [], [], [], Compose, bytes => "日記たる "),
+
+      new Line("Diary", "Keep Playing (Right)", 0xE402, [], 1, 5, [], [], [], Compose, bytes => "YES  "),
+      new Line("Diary", "Keep Playing (Right)", 0xE41E, [], 1, 5, [], [], [], Compose, bytes => "NO   "),
+
+      new Line("Diary", "Write (Right)", 0xE43A, [], 1, 6, [], [], [], Compose, bytes => "____王子"),
+      new Line("Diary", "Write (Right)", 0xE456, [], 1, 6, [], [], [], Compose, bytes => "____王子"),
     };
   }
 
-  static List<Line> GetNamingLines(byte[] rom)
+  static List<Line> GetNameScreenLines(byte[] rom)
   {
     byte[]? Compose(Line line, Translation translation, out string? error)
     {
+      var fixedLength = line.AllBytes.Length;
+      if (translation.Text.Length > fixedLength)
+      {
+        error = $@"must be {fixedLength} bytes or less";
+        return null;
+      }
+
       var bytes = new List<byte>();
 
-      var count = line.AllBytes.Length;
-
-      for (int i = 0; i < count; i++)
+      for (int i = 0; i < fixedLength; i++)
       {
         var c = i >= translation.Text.Length ? ' ' : translation.Text[i];
         if (c == ' ')
@@ -523,12 +553,12 @@ public static class Parser
         }
         else
         {
-          if (!LatinNaming.Contains(c))
+          if (!LatinNameScreen.Contains(c))
           {
-            error = $"invalid naming character '{c}'";
+            error = CharacterMapError(nameof(LatinNameScreen), c);
             return null;
           }
-          bytes.Add(LatinNaming.GetByte(c));
+          bytes.Add(LatinNameScreen.GetByte(c));
         }
       }
 
@@ -564,7 +594,7 @@ public static class Parser
 
     return new List<Line>
     {
-      new Line(0x4F535, -1, 1, 0x12, new byte[0], rom.Skip(0x4F535).Take(0x12).ToArray(), new byte[0], Parse, Compose)
+      new Line("Name Screen", null, 0x4F535, [], 1, 0x12, [], rom.Skip(0x4F535).Take(0x12).ToArray(), [], Compose, Parse)
     };
   }
 
@@ -572,11 +602,15 @@ public static class Parser
   {
     byte[]? Compose(Line line, Translation translation, out string? error)
     {
+      var fixedLength = line.AllBytes.Length;
+      if (translation.Text.Length > fixedLength)
+      {
+        error = $@"must be {fixedLength} bytes or less";
+        return null;
+      }
+
       var bytes = new List<byte>();
-
-      var count = line.AllBytes.Length;
-
-      for (int i = 0; i < count; i++)
+      for (int i = 0; i < fixedLength; i++)
       {
         var c = i >= translation.Text.Length ? ' ' : translation.Text[i];
         if (c == ' ')
@@ -585,12 +619,12 @@ public static class Parser
         }
         else
         {
-          if (!LatinOpening.Contains(c))
+          if (!LatinTitleScreen.Contains(c))
           {
-            error = $"invalid latin opening character '{c}'";
+            error = CharacterMapError(nameof(LatinTitleScreen), c);
             return null;
           }
-          bytes.Add(LatinOpening.GetByte(c));
+          bytes.Add(LatinTitleScreen.GetByte(c));
         }
       }
 
@@ -635,36 +669,51 @@ public static class Parser
     // Title Screen - Opening Crawl
     foreach (var address in new[] { 0xB6B9, 0xB6E9, 0xB719, 0xB749, 0xB779 })
     {
-      ret.Add(new Line(address, -1, 3, 16, new byte[0], rom.Skip(address).Take(0x30).ToArray(), new byte[0], ParseOpening, Compose));
+      ret.Add(new Line("Title Screen", "Opening Crawl", address, [], 3, 16, [], rom.Skip(address).Take(0x30).ToArray(), [], Compose, ParseOpening));
     }
 
     // Title Screen - Start
-    ret.Add(new Line(0xB7A9, -1, 1, 5, new byte[0], rom.Skip(0xB7A9).Take(0x05).ToArray(), new byte[0], ParseButton, Compose));
+    ret.Add(new Line("Title Screen", "Start", 0xB7A9, [], 1, 5, [], rom.Skip(0xB7A9).Take(0x05).ToArray(), [], Compose, ParseButton));
 
     // Title Screen - Continue
-    ret.Add(new Line(0xB7AE, -1, 1, 5, new byte[0], rom.Skip(0xB7AE).Take(0x05).ToArray(), new byte[0], ParseButton, Compose));
+    ret.Add(new Line("Title Screen", "Continue", 0xB7AE, [], 1, 5, [], rom.Skip(0xB7AE).Take(0x05).ToArray(), [], Compose, ParseButton));
 
     return ret;
   }
 
-  static int ResolveDialogAddressTableIndex(int lineIndex)
+  static string CharacterMapError(string characterMapName, char c)
   {
-    var ret = lineIndex;
-    ret += (ret >  163 ?   1 : 0); // 163  - 164  are repeats.
-    ret += (ret >  165 ?  11 : 0); // 165  - 176  are repeats.
-    ret += (ret >  206 ?   2 : 0); // 206  - 208  are repeats.
-    ret += (ret >  214 ?  10 : 0); // 214  - 224  are repeats.
-    ret += (ret >  234 ?   2 : 0); // 234  - 236  are repeats.
-    ret += (ret >  237 ?   1 : 0); // 237  - 238  are repeats.
-    ret += (ret >  252 ?   2 : 0); // 252  - 254  are repeats.
-    ret += (ret >  313 ? 199 : 0); // 313  - 512  are repeats.
-    ret += (ret >  897 ? 127 : 0); // 897  - 1024 are repeats.
-    ret += (ret > 1188 ?  92 : 0); // 1188 - 1280 are repeats.
-    ret += (ret > 1372 ? 164 : 0); // 1372 - 1536 are repeats.
-    ret += (ret > 1682 ? 110 : 0); // 1682 - 1792 are repeats.
-    ret += (ret > 1959 ?  89 : 0); // 1959 - 2048 are repeats.
-    ret += (ret > 2129 ? 175 : 0); // 2129 - 2304 are repeats.
-    return ret;
+    var characterStr = c == '\r' ? $@"'\r', use spaces instead of return" :
+                       c == '\n' ? $@"'\n', use spaces instead of newline" :
+                       $@"'{c}'";
+
+    return $"invalid {nameof(LatinTitleScreen)} character {characterStr}";
+  }
+
+  static int[] ResolveDialogAddressLocations(int address, int lastDAT)
+  {
+    // TODO: Would be better to just parse the DAT.
+    var repeats = new Dictionary<int, int>
+    {
+       { 0x723EA,   2 }, // 163  - 164  are repeats.
+       { 0x7240D,  12 }, // 165  - 176  are repeats.
+       { 0x727A0,   3 }, // 206  - 208  are repeats.
+       { 0x7286D,  11 }, // 214  - 224  are repeats.
+       { 0x729DD,   3 }, // 234  - 236  are repeats.
+       { 0x72A06,   2 }, // 237  - 238  are repeats.
+       { 0x72B6B,   3 }, // 252  - 254  are repeats.
+       { 0x736B4, 200 }, // 313  - 512  are repeats.
+       { 0x78119, 128 }, // 897  - 1024 are repeats.
+       { 0x79DD1,  93 }, // 1188 - 1280 are repeats.
+       { 0x7AE9C, 165 }, // 1372 - 1536 are repeats.
+       { 0x7C93E, 111 }, // 1682 - 1792 are repeats.
+       { 0x7E14B,  90 }, // 1959 - 2048 are repeats.
+       { 0x7F083, 176 }, // 2129 - 2304 are repeats.
+    };
+
+    var repeatCount = repeats.ContainsKey(address) ? repeats[address] : 1;
+    return Enumerable.Range(lastDAT + 1, repeatCount)
+      .ToArray();
   }
 
   enum CompositionModes

@@ -6,8 +6,10 @@ public class Line
   public readonly byte[] Body;
   public readonly int BoxHeight;
   public readonly int BoxWidth;
+  public readonly string Category;
+  public readonly string? Comment;
   readonly ComposeDelegate ComposeDelegate;
-  public readonly int DialogAddressTableLocation;
+  public readonly int[] DialogAddressTableLocations;
   public readonly byte[] Footer;
   public readonly byte[] Header;
   public readonly Translation Translation;
@@ -23,13 +25,15 @@ public class Line
     }
   }
 
-  public int Block
+  public int? Block
   {
     get
     {
-      return DialogAddressTableLocation switch
+      if (!DialogAddressTableLocations.Any())
+        return null;
+
+      return DialogAddressTableLocations.First() switch
       {
-        < 0    => -1,
         < 557  =>  0,
         < 890  =>  1,
         < 1622 =>  2,
@@ -38,14 +42,16 @@ public class Line
     }
   }
 
-  public Line(int address, int datLocation, int boxHeight, int boxWidth, byte[] header, byte[] body, byte[] footer, ParseBodyDelegate parseBody, ComposeDelegate compose)
+  public Line(string category, string? comment, int address, int[] datLocations, int boxHeight, int boxWidth, byte[] header, byte[] body, byte[] footer, ComposeDelegate compose, ParseBodyDelegate parseBody)
   {
     Address = address;
     Body = body;
     BoxHeight = boxHeight;
     BoxWidth = boxWidth;
+    Category = category;
+    Comment = comment;
     ComposeDelegate = compose;
-    DialogAddressTableLocation = datLocation;
+    DialogAddressTableLocations = datLocations;
     Footer = footer;
     Header = header;
     Text = parseBody(body);
@@ -54,7 +60,12 @@ public class Line
 
   public byte[]? Compose(out string? error) => ComposeDelegate(this, Translation, out error);
 
-  public override string ToString() => $@"{Address:X2}";
+  public override string ToString()
+  {
+    var blockText = Block.HasValue ? $@" Block {Block}" : string.Empty;
+    var commentText = Comment is null ? string.Empty : $@", {Comment}";
+    return $@"{Address:X2}: {Category}{blockText}{commentText}";
+  }
 }
 
 public delegate byte[]? ComposeDelegate(Line line, Translation translation, out string? error);
