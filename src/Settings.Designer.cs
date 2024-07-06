@@ -38,12 +38,12 @@ namespace Frogslator {
         [global::System.Configuration.UserScopedSettingAttribute()]
         [global::System.Diagnostics.DebuggerNonUserCodeAttribute()]
         [global::System.Configuration.DefaultSettingValueAttribute("")]
-        public string LastTranslationPath {
+        public string LastFrogPath {
             get {
-                return ((string)(this["LastTranslationPath"]));
+                return ((string)(this["LastFrogPath"]));
             }
             set {
-                this["LastTranslationPath"] = value;
+                this["LastFrogPath"] = value;
             }
         }
         
@@ -56,6 +56,30 @@ namespace Frogslator {
             }
             set {
                 this["LastSaveROMPath"] = value;
+            }
+        }
+        
+        [global::System.Configuration.UserScopedSettingAttribute()]
+        [global::System.Diagnostics.DebuggerNonUserCodeAttribute()]
+        [global::System.Configuration.DefaultSettingValueAttribute("")]
+        public string LastSaveBINPath {
+            get {
+                return ((string)(this["LastSaveBINPath"]));
+            }
+            set {
+                this["LastSaveBINPath"] = value;
+            }
+        }
+        
+        [global::System.Configuration.UserScopedSettingAttribute()]
+        [global::System.Diagnostics.DebuggerNonUserCodeAttribute()]
+        [global::System.Configuration.DefaultSettingValueAttribute("")]
+        public string LastLoadAltROM {
+            get {
+                return ((string)(this["LastLoadAltROM"]));
+            }
+            set {
+                this["LastLoadAltROM"] = value;
             }
         }
     }

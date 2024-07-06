@@ -1,70 +1,24 @@
 ﻿using System.Text;
+using static System.Runtime.InteropServices.JavaScript.JSType;
 
 namespace Frogslator;
 
 static class Program
 {
+  const int Graphics_Font_RequiredLength = 9472;
+
   public static readonly int MaxBlockSize = 0x4000;
+  public static readonly string BINFilter = "Binary File(*.bin)|*.bin";
   public static readonly string ROMFilter = "GameBoy File(*.gb)|*.gb";
-  public static readonly string TranslationFilter = "Frog File (*.frog)|*.frog";
+  public static readonly string FrogFilter = "Frog File (*.frog)|*.frog";
 
   public static List<GameBoyTile> FontBitmaps { get; private set; }
-  public static byte[] Grahpics_TitleScreen { get; private set; }
+  public static byte[] Graphics_TitleScreen { get; private set; }
   public static byte[] Graphics_Font { get; private set; }
-  public static Color[] Palette { get; private set; }
 
-  static Program()
+  static string? DoFileDialog(FileDialog fd, string title, string filter, StringSetting lastPath)
   {
-    FontBitmaps = new List<GameBoyTile>();
-    Grahpics_TitleScreen = File.ReadAllBytes($@"Graphics\Graphics_TitleScreen.gb");
-    Graphics_Font = File.ReadAllBytes($@"Graphics\Graphics_Font.gb");
-    Palette =
-    [
-        Color.FromArgb(255, 255, 255),
-        Color.FromArgb(168, 168, 168),
-        Color.FromArgb(96, 96, 96),
-        Color.FromArgb(0, 0, 0),
-    ];
-
-    for (int i = 0x0; i < Graphics_Font.Length; i += 0x10)
-    {
-      FontBitmaps.Add(new GameBoyTile(Graphics_Font, i, Palette, 4));
-    }
-  }
-
-  public static string LastLoadROMPath
-  {
-    get => Settings.Default.LastLoadROMPath;
-    set
-    {
-      Settings.Default.LastLoadROMPath = value;
-      Settings.Default.Save();
-    }
-  }
-
-  public static string LastSaveROMPath
-  {
-    get => Settings.Default.LastSaveROMPath;
-    set
-    {
-      Settings.Default.LastSaveROMPath = value;
-      Settings.Default.Save();
-    }
-  }
-
-  public static string LastTranslationPath
-  {
-    get => Settings.Default.LastTranslationPath;
-    set
-    {
-      Settings.Default.LastTranslationPath = value;
-      Settings.Default.Save();
-    }
-  }
-
-  static string? DoFileDialog(FileDialog fd, string title, string filter, Func<string> getDefaultPath, Action<string> setDefaultPath)
-  {
-    var path = getDefaultPath();
+    var path = lastPath.Get();
     
     if (!string.IsNullOrWhiteSpace(path))
     {
@@ -84,20 +38,46 @@ static class Program
       return null;
     }
 
-    setDefaultPath(fd.FileName);
+    lastPath.Set(fd.FileName);
 
     return fd.FileName;
   }
 
+  public static void ExtractTitleGraphicsFromROM()
+  {
+    var address = Constants.Addresses.TitleGraphicsStart.ToString("X2");
+    var loadPath = DoFileDialog(new OpenFileDialog(), $@"Choose any Kaeru no Tame ni Kane Wa Naru ROM, original or modified, where the title is at 0x{address}", ROMFilter, LastPaths.LoadAltROM);
+    if (loadPath is null)
+    {
+      return;
+    }
+
+    var savePath = DoFileDialog(new SaveFileDialog(), "Save title graphics binary", BINFilter, LastPaths.SaveBIN); 
+    if (savePath is null)
+    {
+      return;
+    }
+
+    var rom = File.ReadAllBytes(loadPath);
+
+    var bin = new byte[Constants.Lengths.TitleGraphics];
+    for (var i = 0; i < bin.Length; i++)
+    {
+      bin[i] = rom[i + Constants.Addresses.TitleGraphicsStart];
+    }
+
+    File.WriteAllBytes(savePath, bin);
+  }
+
   public static byte[]? LoadROMFromDisk()
   {
-    var path = DoFileDialog(new OpenFileDialog(), "Choose a valid Japanese Kaeru no Tame ni Kane Wa Naru ROM", ROMFilter, () => LastLoadROMPath, p => LastLoadROMPath = p);
+    var path = DoFileDialog(new OpenFileDialog(), "Choose a valid Japanese Kaeru no Tame ni Kane Wa Naru ROM", ROMFilter, LastPaths.LoadROM);
     if (path is null)
     {
       return null;
     }
 
-    var ret = LoadROMFromDisk(path, out string error);
+    var ret = LoadROMFromDisk(path, out var error);
     if (error is not null)
     {
       MessageBox.Show(error);
@@ -128,11 +108,12 @@ static class Program
 
   public static void LoadTranslationFromDisk(List<Line> lines)
   {
-    var path = DoFileDialog(new OpenFileDialog(), "Load Translation", TranslationFilter, () => LastTranslationPath, p => LastTranslationPath = p);
-    if (path == null)
+    var path = DoFileDialog(new OpenFileDialog(), "Load Translation", FrogFilter, LastPaths.Frog);
+    if (path is null)
     {
       return;
     }
+
     LoadTranslationFromDisk(path, lines);
   }
 
@@ -182,14 +163,13 @@ static class Program
 
   public static void SaveROMToDisk(byte[] rom, List<Line> lines)
   {
-    var path = DoFileDialog(new SaveFileDialog(), "Save ROM", ROMFilter, () => LastSaveROMPath, p => LastSaveROMPath = p);
+    var path = DoFileDialog(new SaveFileDialog(), "Save ROM", ROMFilter, LastPaths.SaveROM);
     if (path is null)
     {
       return;
     }
 
-    SaveROMToDisk(path, rom, lines, out string error);
-
+    SaveROMToDisk(path, rom, lines, out var error);
     if (error is not null)
     {
       MessageBox.Show("Could not save ROM because at least one line has an error:\r\n" + error);
@@ -263,9 +243,9 @@ static class Program
     }
 
     // Change the title graphics.
-    for (int i = 0x4D770; i < 0x4DD10; i++)
+    for (int i = Constants.Addresses.TitleGraphicsStart; i < Constants.Addresses.TitleGraphicsStop; i++)
     {
-      newROM[i] = Grahpics_TitleScreen[i - 0x4D770];
+      newROM[i] = Graphics_TitleScreen[i - Constants.Addresses.TitleGraphicsStart];
     }
 
     // Change the font graphics.
@@ -307,7 +287,7 @@ static class Program
 
   public static void SaveTranslationToDisk(List<Translation> translation)
   {
-    var path = DoFileDialog(new SaveFileDialog(), "Save Translation", TranslationFilter, () => LastTranslationPath, p => LastTranslationPath = p);
+    var path = DoFileDialog(new SaveFileDialog(), "Save Translation", FrogFilter, LastPaths.Frog);
     if (path == null)
     {
       return;
@@ -346,12 +326,43 @@ static class Program
     Application.EnableVisualStyles();
     Application.SetCompatibleTextRenderingDefault(false);
 
+    Graphics_TitleScreen = File.ReadAllBytes($@"Graphics\Graphics_TitleScreen.bin");
+    if (Graphics_TitleScreen.Length != Constants.Lengths.TitleGraphics)
+    {
+      MessageBox.Show($@"Title screen graphics must be exactly {Constants.Lengths.TitleGraphics} bytes.");
+      return;
+    }
+
+    Graphics_Font = File.ReadAllBytes($@"Graphics\Graphics_Font.bin");
+    if (Graphics_Font.Length != Graphics_Font_RequiredLength)
+    {
+      MessageBox.Show($@"Font graphics must be exactly {Graphics_Font_RequiredLength} bytes.");
+      return;
+    }
+    
+    var palette = new[]
+    {
+      Color.FromArgb(255, 255, 255),
+      Color.FromArgb(168, 168, 168),
+      Color.FromArgb(96, 96, 96),
+      Color.FromArgb(0, 0, 0),
+    };
+
+    FontBitmaps = new List<GameBoyTile>();
+    for (int i = 0x0; i < Graphics_Font.Length; i += 0x10)
+    {
+      FontBitmaps.Add(new GameBoyTile(Graphics_Font, i, palette, 4));
+    }
+
     var rom = (byte[])null;
     var lines = (List<Line>)null;
 
-    if (File.Exists(LastLoadROMPath) && File.Exists(LastTranslationPath) && MessageBox.Show("Reload last open Japanese ROM and translation?", "Reload?", MessageBoxButtons.YesNo) == DialogResult.Yes)
+    var lastROMPath = LastPaths.LoadROM.Get();
+    var lastFrogPath = LastPaths.Frog.Get();
+
+    if (File.Exists(lastROMPath) && File.Exists(lastFrogPath) && MessageBox.Show("Reload last open Japanese ROM and translation?", "Reload?", MessageBoxButtons.YesNo) == DialogResult.Yes)
     {
-      rom = LoadROMFromDisk(LastLoadROMPath, out var loadROMError);
+      rom = LoadROMFromDisk(lastROMPath, out var loadROMError);
       if (rom is null)
       {
         if (loadROMError is not null)
@@ -363,7 +374,7 @@ static class Program
 
       lines = Parser.GetLines(rom);
 
-      LoadTranslationFromDisk(LastTranslationPath, lines);
+      LoadTranslationFromDisk(lastFrogPath, lines);
     }
     else
     {
@@ -378,5 +389,15 @@ static class Program
 
     // Show the dialog editing screen.
     Application.Run(new DialogEditor(rom, lines));
+  }
+
+  public static class LastPaths
+  {
+    public static StringSetting SaveBIN    = new StringSetting(Settings.Default, nameof(Settings.LastSaveBINPath));
+    public static StringSetting LoadAltROM = new StringSetting(Settings.Default, nameof(Settings.LastLoadAltROM));
+
+    public static StringSetting LoadROM = new StringSetting(Settings.Default, nameof(Settings.LastLoadROMPath));
+    public static StringSetting SaveROM = new StringSetting(Settings.Default, nameof(Settings.LastSaveROMPath));
+    public static StringSetting Frog    = new StringSetting(Settings.Default, nameof(Settings.LastFrogPath   ));
   }
 }

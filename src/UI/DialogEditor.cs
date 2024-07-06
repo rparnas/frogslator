@@ -17,7 +17,7 @@ public partial class DialogEditor : Form
     RecalculateFreeSpace(lines);
 
     InitializeComponent();
-    Text = Program.LastTranslationPath;
+    Text = Program.LastPaths.Frog.Get();
     tb_UsefulGlyphs.Text = string.Join(' ', UsefulGlpyhs);
 
     MainMenuStrip = new MenuStrip();
@@ -34,6 +34,8 @@ public partial class DialogEditor : Form
         }),
         new ToolStripSeparator(),
         new ToolStripMenuItem("Export ROM...", null, (s, e) => Program.SaveROMToDisk(rom, lines)),
+        new ToolStripSeparator(),
+        new ToolStripMenuItem("Extract Title Graphics from ROM...", null, (s, e) => Program.ExtractTitleGraphicsFromROM()),
         new ToolStripSeparator(),
         new ToolStripMenuItem("Exit", null, (s, e) => Close())
       ])

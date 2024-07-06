@@ -19,10 +19,10 @@
   </ItemGroup>
 
   <ItemGroup>
-    <None Update="Graphics\Graphics_Font.gb">
+    <None Update="Graphics\Graphics_Font.bin">
       <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
     </None>
-    <None Update="Graphics\Graphics_TitleScreen.gb">
+    <None Update="Graphics\Graphics_TitleScreen.bin">
       <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
     </None>
     <None Update="Settings.settings">

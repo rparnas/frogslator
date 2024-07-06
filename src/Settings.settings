@@ -5,10 +5,16 @@
     <Setting Name="LastLoadROMPath" Type="System.String" Scope="User">
       <Value Profile="(Default)" />
     </Setting>
-    <Setting Name="LastTranslationPath" Type="System.String" Scope="User">
+    <Setting Name="LastFrogPath" Type="System.String" Scope="User">
       <Value Profile="(Default)" />
     </Setting>
     <Setting Name="LastSaveROMPath" Type="System.String" Scope="User">
+      <Value Profile="(Default)" />
+    </Setting>
+    <Setting Name="LastSaveBINPath" Type="System.String" Scope="User">
+      <Value Profile="(Default)" />
+    </Setting>
+    <Setting Name="LastLoadAltROM" Type="System.String" Scope="User">
       <Value Profile="(Default)" />
     </Setting>
   </Settings>
