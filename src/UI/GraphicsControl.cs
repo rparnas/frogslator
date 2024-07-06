@@ -21,6 +21,7 @@ public partial class GraphicsControl : UserControl
       }
 
       var page = Pages[PageIndex];
+      var qmIndex = Parser.LatinDialog.GetByte('?');
 
       for (var row = 0; row < Rows; row++)
       {
@@ -29,7 +30,7 @@ public partial class GraphicsControl : UserControl
         {
           var c = col < line.Length ? line[col] : ' ';
           var spaceIndex = 79;
-          var qmIndex = Parser.LatinDialog.GetByte('?');
+
           var i = c == ' ' ? spaceIndex : Parser.LatinDialog.Contains(c) ? Parser.LatinDialog.GetByte(c) : qmIndex;
           var bmp = i < Program.FontBitmaps.Count ? Program.FontBitmaps[i] : Program.FontBitmaps[qmIndex];
           e.Graphics.DrawImage(bmp.Bitmap, new Point(32 * col, 32 * row));

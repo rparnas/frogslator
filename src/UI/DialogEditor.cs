@@ -1,10 +1,9 @@
-
-using System.Text;
-
-namespace Frogslator;
+﻿namespace Frogslator;
 
 public partial class DialogEditor : Form
 {
+  public static readonly char[] UsefulGlpyhs = ['▲', '▼', '◄', '►', '♥', '‘', '\'', '“', '"', 'é'];
+
   readonly int[] BlockSizes;
 
   Line? SelectedLine => lb_Lines.SelectedItem as Line;
@@ -17,6 +16,7 @@ public partial class DialogEditor : Form
 
     InitializeComponent();
     Text = Program.LastTranslationPath;
+    tb_UsefulGlyphs.Text = string.Join(' ', UsefulGlpyhs);
 
     MainMenuStrip = new MenuStrip();
     MainMenuStrip.Items.AddRange(
@@ -180,23 +180,35 @@ public partial class DialogEditor : Form
       return;
     }
 
-    var text = line.Translation.Text;
-    text = text.Replace("[Text Name]", cb_SixLetterNames.Checked ? "~Name~" : "NAME");
-    while (text.Contains('['))
+    var displayLines = line.Translation.Text
+      .Split('\n')
+      .ToList();
+    for (var i = 0; i < displayLines.Count; i++)
     {
-      var openIndex = text.IndexOf('[');
-      var closeIndex = text.IndexOf(']');
-      if (closeIndex == -1)
+      var displayLine = displayLines[i];
+
+      displayLine = displayLine.Replace("[Text Name]", cb_SixLetterNames.Checked ? "~NAME~" : "NAME");
+
+      while (displayLine.Contains('['))
       {
-        break;
+        var openIndex = displayLine.IndexOf('[');
+        var closeIndex = displayLine.IndexOf(']');
+        if (closeIndex == -1)
+        {
+          break;
+        }
+
+        var term = displayLine.Substring(openIndex, closeIndex - openIndex + 1);
+        if (term == "[Jumbo]")
+          displayLines.Insert(i + 1, string.Empty);
+
+        displayLine = displayLine.Remove(openIndex, closeIndex - openIndex + 1);
       }
-      else
-      {
-        text = text.Remove(openIndex, closeIndex - openIndex + 1);
-      }
+
+      displayLines[i] = displayLine;
     }
 
-    previewControl.Setup(reset, line.BoxHeight, line.BoxWidth, text);
+    previewControl.Setup(reset, line.BoxHeight, line.BoxWidth, string.Join('\n', displayLines.ToArray()));
 
     btn_PreviewUp.Enabled = previewControl.PageIndex > 0;
     btn_PreviewDown.Enabled = previewControl.PageIndex < previewControl.PageCount - 1;

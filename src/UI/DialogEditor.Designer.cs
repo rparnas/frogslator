@@ -88,7 +88,7 @@ namespace Frogslator
       tb_UsefulGlyphs.ReadOnly = true;
       tb_UsefulGlyphs.Size = new Size(261, 29);
       tb_UsefulGlyphs.TabIndex = 8;
-      tb_UsefulGlyphs.Text = "▲ ▼ ◄ ► ♥ ‥ … ‘ “";
+      tb_UsefulGlyphs.Text = string.Empty;
       // 
       // lbl_Block3Bytes
       // 
