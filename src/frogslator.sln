@@ -1,9 +1,9 @@
 ﻿
 Microsoft Visual Studio Solution File, Format Version 12.00
-# Visual Studio 15
-VisualStudioVersion = 15.0.28307.421
+# Visual Studio Version 17
+VisualStudioVersion = 17.10.35013.160
 MinimumVisualStudioVersion = 10.0.40219.1
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Frogslator", "Frogslator.csproj", "{92A438E7-21FF-4479-A7CE-D46C96C1299A}"
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Frogslator", "Frogslator.csproj", "{35A1B2D7-0110-44E1-A29B-54884ED188D4}"
 EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
@@ -11,15 +11,15 @@ Global
 		Release|Any CPU = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(ProjectConfigurationPlatforms) = postSolution
-		{92A438E7-21FF-4479-A7CE-D46C96C1299A}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
-		{92A438E7-21FF-4479-A7CE-D46C96C1299A}.Debug|Any CPU.Build.0 = Debug|Any CPU
-		{92A438E7-21FF-4479-A7CE-D46C96C1299A}.Release|Any CPU.ActiveCfg = Release|Any CPU
-		{92A438E7-21FF-4479-A7CE-D46C96C1299A}.Release|Any CPU.Build.0 = Release|Any CPU
+		{35A1B2D7-0110-44E1-A29B-54884ED188D4}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{35A1B2D7-0110-44E1-A29B-54884ED188D4}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{35A1B2D7-0110-44E1-A29B-54884ED188D4}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{35A1B2D7-0110-44E1-A29B-54884ED188D4}.Release|Any CPU.Build.0 = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE
 	EndGlobalSection
 	GlobalSection(ExtensibilityGlobals) = postSolution
-		SolutionGuid = {62A26417-287E-42CD-9BAE-E931B6F49036}
+		SolutionGuid = {395D085C-E630-49A1-97CE-5EA318E2490F}
 	EndGlobalSection
 EndGlobal
