@@ -167,6 +167,17 @@ public static class Parser
     /* 0x51Cxx */ '～', 'レ', 'Ｚ', '‥',  'ギ', 'ャ', 'ぐ', 'わ', '同', 'じ', '？', '？', 'ハ', '？', '？', 'ぁ'
   ]);
 
+  public static readonly HashSet<int> UnusedLines = new HashSet<int>
+  {
+    0x7274C,
+    0x72758,
+    0x72764,
+    0x72770,
+    0x7277C,
+    0x72788,
+    0x72794,
+  };
+
   public static List<Line> GetLines(byte[] rom)
   {
     return new List<Line>()

@@ -11,7 +11,7 @@ public class Translation
   {
     Address = address;
     Notes = string.Empty;
-    Skip = false;
+    Skip = Parser.UnusedLines.Contains(address);
     Text = string.Empty;
   }
 }
