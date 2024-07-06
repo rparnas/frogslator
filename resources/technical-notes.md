@@ -9,29 +9,29 @@ Bytes on the opening screen refer the above table. The table index referred to b
 Each paragraph in the opening crawl has three physical lines of 16 bytes. This is followed by the Start and Continue buttons.
 
 * Paragraph 1
-  * `0xB6B9` – `0xB6C8`  –  むか～し　むかし
-  * `0xB6C9` – `0xB6D8`  –  大変　なかのよい　２つの国に
-  * `0xB6D9` – `0xB6E8`  – ２人の　王子セマが　おりました。
+  * `0xB6B9` – `0xB6C8` – むか～し　むかし
+  * `0xB6C9` – `0xB6D8` – 大変　なかのよい　２つの国に
+  * `0xB6D9` – `0xB6E8` – ２人の　王子セマが　おりました。
 * Paragraph 2
   * `0xB6E9` – `0xB6F8` – 
   * `0xB6F9` – `0xB708` – １人は　チャッカリものの
-  * `0xB709` – `0xB718` –  カスターど王国の　　王子セマ。
+  * `0xB709` – `0xB718` – カスターど王国の　　王子セマ。
 * Paragraph 3
-  * `0xB719` – `0xB728`  – 
-  * `0xB729` – `0xB738`  –  もう１ひとは　あわてんぼうの
-  * `0xB739` – `0xB748`  –  サブレ王国の　  王子サマ。
+  * `0xB719` – `0xB728` – 
+  * `0xB729` – `0xB738` –  もう１ひとは　あわてんぼうの
+  * `0xB739` – `0xB748` –  サブレ王国の　  王子サマ。
 * Paragraph 4
-  * `0xB749` – `0xB758`  – ２人は　小さなころから　
-  * `0xB759` – `0xB768`  –  ナニをやっても　ライバルでした。
-  * `0xB769` – `0xB778`  – 
+  * `0xB749` – `0xB758` – ２人は　小さなころから
+  * `0xB759` – `0xB768` – ナニをやっても　ライバルでした。
+  * `0xB769` – `0xB778` – 
 * Paragraph 5
-  * `0xB779` – `0xB788`  –  これは　そんな
-  * `0xB789` – `0xB798`  –  ２ひとの　王子サマの
-  * `0xB799` – `0xB7A8`  –  ぼうけんの　ものがたり　です。
+  * `0xB779` – `0xB788` – これは　そんな
+  * `0xB789` – `0xB798` – ２ひとの　王子サマの
+  * `0xB799` – `0xB7A8` – ぼうけんの　ものがたり　です。
 * Start Button 
-  * `0xB7A9` – `0xB7AD`  –  はじめから
+  * `0xB7A9` – `0xB7AD` – はじめから
 * Continue Button
-  * `0xB7AE` – `0xB7B4`  –  つづき　　
+  * `0xB7AE` – `0xB7B2` – つづき
 
 ## Name Entry (`0x4F534` – `0x4F69B`)
 
@@ -43,34 +43,43 @@ Prompt
 
 ## Diary
 
-Each character on the graphics screen is specified by two bytes. The first byte is always 0x00. The lines seem delimited with 0xFF, putting in longer phrases than intended seems to cause extra letters to be ignored.
+Each character on the graphics screen is specified by two bytes. The first byte is always 0x00.
 
-* `0xE210` – `0xE219` – 日記ちょう (header, diary from title screen)
-
-* `0xE22E`  – `0xE231` – 王子 (header, diary in-game)
-* `0xE234` – `0xE23D` – 日記ちょう (header, diary in-game)
-* `0xE242` – `0xE24B` – どの日記で (left page, 1st line, diary from title screen)
-* `0xE24E` – `0xE25B` – はじめますか？(left page, 2nd line, diary from title screen)
-* `0xE25C` – 
-* `0xE27A` – `0xE283` どの日記を (left page, 1st line, erase diary from title screen)
-* `0xE288` – `0xE295` けしますか？ (left page, 2nd line, erase diary from title screen)
-* `0xE2B0` – どうしますか？
-* `0xE304` – どのぺーじからよみますか？
-* `0xE33E` – どの日記に
-* `0xE34C` – きろくする？
-* `0xE374` – きろくしました
-* `0xE390` – たびを
-* `0xE39E` – つづけますか？
-* `0xE3AE` – 日記けす
-* `0xE3BC` – もどる
-* `0xE3CA` – 日記つける
-* `0xE3E6` – 日記たる
-* `0xE402` – YES
-* `0xE41E` – NO
-* `0xE43A` – `0xE435` – ----王子 (right page, diary from title screen)
-* `0xE456` – `0xE461` – ----王子 (right page, diary from title screen)
-* `0xE478` – `0xE47B` 日め (right page, diary from title screen)
-
+* `E208` – `E223` – Load (Top) - 日記ちょう
+* `E22E` – `E233` – In-Game (Top 1) - 王子
+* `E234` – `E23F` – In-Game (Top 2) - 日記ちょう
+* `E240` – `E24D` – Load (Left 1) - どの日記で
+* `E24E` – `E25D` – Load (Left 2) - はじめますか？
+* `E25C` – `E269` – Load (Left 3) - 
+* `E26A` – `E277` – Load (Left 4) - 
+* `E278` – `E285` – Erase (Left 1) - どの日記で
+* `E286` – `E293` – Erase (Left 2) - けしますか？
+* `E294` – `E2A1` – Erase (Left 3) - 
+* `E2A2` – `E2AF` – Erase (Left 4) - 
+* `E2B0` – `E2BD` – In-Game (Left 1) - どうしますか？
+* `E2BE` – `E2CB` – In-Game (Left 2) - 
+* `E2CC` – `E2D9` – In-Game (Left 3) - 
+* `E2DA` – `E2E7` – In-Game (Left 4) - 
+* `E304` – `E311` – Read (Left 1) - どのぺーじから
+* `E312` – `E31F` – Read (Left 2) - よみますか？
+* `E320` – `E32D` – Read (Left 3) - 
+* `E32E` – `E33B` – Read (Left 4) - 
+* `E33C` – `E349` – Write (Left 1) - どの日記に
+* `E34A` – `E357` – Write (Left 2) - きろくする？
+* `E358` – `E365` – Write (Left 3) - 
+* `E366` – `E373` – Write (Left 4) - 
+* `E374` – `E381` – Keep Playing (Left 1) - きろくしました
+* `E382` – `E38F` – Keep Playing (Left 2) - 
+* `E390` – `E39D` – Keep Playing (Left 3) - たびを
+* `E39E` – `E3AB` – Keep Playing (Left 4) - つづけますか？
+* `E3AE` – `E3B7` – Load (Right) - 日記けす
+* `E3BC` – `E3C5` – In-Game (Right) - もどる
+* `E3CA` – `E3D3` – In-Game (Right) - 日記つける
+* `E3E6` – `E3EF` – In-Game (Right) - 日記たる
+* `E402` – `E40B` – Keep Playing (Right) - YES
+* `E41E` – `E427` – Keep Playing (Right) - NO
+* `E43A` – `E445` – Write (Right) - ____王子
+* `E456` – `E461` – Write (Right) - ____王子
 
 ## Dialog Address Table
 The address of the nth line’s address is stored in a 2 byte pair at `0x1CB2E + (0x02 * [N])`. To find a line in the dialog block, reverse the bytes of the 2 byte pair and add one of the following offsets: 
