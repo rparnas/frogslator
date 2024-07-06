@@ -1,12 +1,9 @@
 ﻿using System.Text;
-using static System.Runtime.InteropServices.JavaScript.JSType;
 
 namespace Frogslator;
 
 static class Program
 {
-  const int Graphics_Font_RequiredLength = 9472;
-
   public static readonly int MaxBlockSize = 0x4000;
   public static readonly string BINFilter = "Binary File(*.bin)|*.bin";
   public static readonly string ROMFilter = "GameBoy File(*.gb)|*.gb";
@@ -215,7 +212,7 @@ static class Program
         {
           offset = "0" + offset;
         }
-        foreach (var datIndex in l.DialogAddressTableLocations)
+        foreach (var datIndex in l.DialogAddressTableIndicies)
         {
           newROM[(datIndex * 2) + 0x1CB2E    ] = byte.Parse(offset.Substring(2, 2), System.Globalization.NumberStyles.AllowHexSpecifier);
           newROM[(datIndex * 2) + 0x1CB2E + 1] = byte.Parse(offset.Substring(0, 2), System.Globalization.NumberStyles.AllowHexSpecifier);
@@ -249,9 +246,9 @@ static class Program
     }
 
     // Change the font graphics.
-    for (int i = 0x50000; i < 0x52000; i++)
+    for (int i = Constants.Addresses.FontGraphicsStart; i < Constants.Addresses.FontGraphicsStop; i++)
     {
-      newROM[i] = Graphics_Font[i - 0x50000];
+      newROM[i] = Graphics_Font[i - Constants.Addresses.FontGraphicsStart];
     }
 
     // Dialog
@@ -323,46 +320,59 @@ static class Program
   [STAThread]
   static void Main()
   {
+    static byte[]? LoadGraphics(string fileName, int requiredLength)
+    {
+      var filePath = Path.Combine("Graphics", fileName);
+      var bin = File.ReadAllBytes(filePath);
+      if (bin.Length != requiredLength)
+      {
+        MessageBox.Show($@"{filePath} must be exactly {requiredLength} bytes.");
+        return null;
+      }
+
+      return bin;
+    }
+
+    static List<GameBoyTile> MakeFontBitmaps(byte[] fontGraphics)
+    {
+      var palette = new[]
+      {
+            Color.FromArgb(255, 255, 255),
+            Color.FromArgb(168, 168, 168),
+            Color.FromArgb(96, 96, 96),
+            Color.FromArgb(0, 0, 0),
+      };
+
+      var ret = new List<GameBoyTile>();
+
+      for (var i = 0x0; i < Graphics_Font.Length; i += 0x10)
+      {
+        ret.Add(new GameBoyTile(Graphics_Font, i, palette, 4));
+      }
+
+      return ret;
+    }
+
     Application.EnableVisualStyles();
     Application.SetCompatibleTextRenderingDefault(false);
 
-    Graphics_TitleScreen = File.ReadAllBytes($@"Graphics\Graphics_TitleScreen.bin");
-    if (Graphics_TitleScreen.Length != Constants.Lengths.TitleGraphics)
+    var fontGraphics = LoadGraphics("Graphics_Font.bin", Constants.Lengths.FontGraphics);
+    var titleGraphics = LoadGraphics("Graphics_TitleScreen.bin", Constants.Lengths.TitleGraphics);
+    if (fontGraphics is null || titleGraphics is null)
     {
-      MessageBox.Show($@"Title screen graphics must be exactly {Constants.Lengths.TitleGraphics} bytes.");
       return;
     }
 
-    Graphics_Font = File.ReadAllBytes($@"Graphics\Graphics_Font.bin");
-    if (Graphics_Font.Length != Graphics_Font_RequiredLength)
-    {
-      MessageBox.Show($@"Font graphics must be exactly {Graphics_Font_RequiredLength} bytes.");
-      return;
-    }
-    
-    var palette = new[]
-    {
-      Color.FromArgb(255, 255, 255),
-      Color.FromArgb(168, 168, 168),
-      Color.FromArgb(96, 96, 96),
-      Color.FromArgb(0, 0, 0),
-    };
-
-    FontBitmaps = new List<GameBoyTile>();
-    for (int i = 0x0; i < Graphics_Font.Length; i += 0x10)
-    {
-      FontBitmaps.Add(new GameBoyTile(Graphics_Font, i, palette, 4));
-    }
-
-    var rom = (byte[])null;
-    var lines = (List<Line>)null;
+    Graphics_Font = fontGraphics;
+    Graphics_TitleScreen = titleGraphics;
+    FontBitmaps = MakeFontBitmaps(fontGraphics);
 
     var lastROMPath = LastPaths.LoadROM.Get();
     var lastFrogPath = LastPaths.Frog.Get();
 
     if (File.Exists(lastROMPath) && File.Exists(lastFrogPath) && MessageBox.Show("Reload last open Japanese ROM and translation?", "Reload?", MessageBoxButtons.YesNo) == DialogResult.Yes)
     {
-      rom = LoadROMFromDisk(lastROMPath, out var loadROMError);
+      var rom = LoadROMFromDisk(lastROMPath, out var loadROMError);
       if (rom is null)
       {
         if (loadROMError is not null)
@@ -372,23 +382,24 @@ static class Program
         return;
       }
 
-      lines = Parser.GetLines(rom);
+      var lines = Parser.GetLines(rom);
 
       LoadTranslationFromDisk(lastFrogPath, lines);
+
+      Application.Run(new DialogEditor(rom, lines));
     }
     else
     {
-      rom = LoadROMFromDisk();
+      var rom = LoadROMFromDisk();
       if (rom is null)
       {
         return;
       }
 
-      lines = Parser.GetLines(rom);
-    }
+      var lines = Parser.GetLines(rom);
 
-    // Show the dialog editing screen.
-    Application.Run(new DialogEditor(rom, lines));
+      Application.Run(new DialogEditor(rom, lines));
+    }
   }
 
   public static class LastPaths

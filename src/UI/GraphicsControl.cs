@@ -48,10 +48,27 @@ public partial class GraphicsControl : UserControl
     Refresh();
   }
 
-  public void Setup(bool reset, int rows, int cols, string text)
+  public void Setup(bool reset, int rows, int cols, string text, bool assumeSixLetterNames)
   {
-    var oldPages = Pages.Count;
+    var oldPageCount = Pages.Count;
+    var processedText = ProcessText(text, assumeSixLetterNames);
+    var newPages = PaginateText(rows, cols, processedText);
+    var newPageCount = newPages.Count;
 
+    Cols = cols;
+    PageIndex = reset ? 0 : 
+                newPageCount != oldPageCount && PageIndex == oldPageCount - 1 ? newPageCount - 1 : 
+                PageIndex >= newPages.Count ? newPageCount -1 :
+                PageIndex;
+    Pages = newPages;
+    Rows = rows;
+    Size = new Size(32 * cols, 32 * rows);
+
+    Refresh();
+  }
+
+  static List<List<string>> PaginateText(int rows, int cols, string text)
+  {
     var pages = new List<List<string>> { new List<string> { string.Empty } };
 
     void newline()
@@ -81,17 +98,47 @@ public partial class GraphicsControl : UserControl
       pages.Last()[pages.Last().Count - 1] += c;
     }
 
-    var newPages = pages.Count;
+    return pages;
+  }
 
-    Cols = cols;
-    PageIndex = reset ? 0 : 
-                newPages != oldPages && PageIndex == oldPages - 1 ? newPages - 1 : 
-                PageIndex >= pages.Count ? newPages -1 :
-                PageIndex;
-    Pages = pages;
-    Rows = rows;
-    Size = new Size(32 * cols, 32 * rows);
+  static string ProcessText(string text, bool assumeSixLetterNames)
+  {
+    var displayLines = text
+      .Split('\n')
+      .ToList();
 
-    Refresh();
+    for (var i = 0; i < displayLines.Count; i++)
+    {
+      var displayLine = displayLines[i];
+
+      displayLine = displayLine.Replace("[Text Name]", assumeSixLetterNames ? "~NAME~" : "NAME");
+
+      while (displayLine.Contains('['))
+      {
+        var openIndex = displayLine.IndexOf('[');
+        var closeIndex = displayLine.IndexOf(']');
+        if (closeIndex == -1)
+        {
+          break;
+        }
+
+        var term = displayLine.Substring(openIndex, closeIndex - openIndex + 1);
+        displayLine = displayLine.Remove(openIndex, closeIndex - openIndex + 1);
+
+        if (term == "[Jumbo]")
+        {
+          displayLines.Insert(i + 1, string.Empty);
+        }
+        if (term == "[Text Space For Icon]")
+        {
+          var spaceForIcon = "    ";
+          displayLine = spaceForIcon + displayLine;
+        }
+      }
+
+      displayLines[i] = displayLine;
+    }
+
+    return string.Join('\n', displayLines.ToArray());
   }
 }

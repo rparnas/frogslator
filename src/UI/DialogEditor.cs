@@ -1,6 +1,4 @@
-﻿using System.Text;
-
-namespace Frogslator;
+﻿namespace Frogslator;
 
 public partial class DialogEditor : Form
 {
@@ -127,14 +125,37 @@ public partial class DialogEditor : Form
 
     if (line is not null)
     {
-      var bytesText = line.AllBytes.Length > 0 ? $@" ({line.AllBytes.Length} bytes)" : string.Empty;
-
       cb_Skip.Checked = line.Translation.Skip;
       cb_Skip.Enabled = line.Block.HasValue;
+
+      if (line.Category == LineCategories.Dialog)
+      {
+        lb_DAT.Items.Clear();
+        foreach (var datIndex in line.DialogAddressTableIndicies)
+        {
+          lb_DAT.Items.Add(datIndex);
+        }
+
+        lb_DAT.Visible = true;
+        lbl_DAT.Visible = true;
+      }
+      else
+      {
+        lb_DAT.Items.Clear();
+
+        lb_DAT.Visible = false;
+        lbl_DAT.Visible = false;
+      }
+
       gb_Line.Text = $@"0x{line.Address:X2}: {line.Category}";
+
+      var bytesText = line.AllBytes.Length > 0 ? $@" ({line.AllBytes.Length} bytes)" : string.Empty;
       lbl_Text.Text = $@"Text{bytesText}";
+
       tb_Notes.Text = line.Translation.Notes.Replace("\n", "\r\n");
+
       tb_Text.Text = line.Text.Replace("\n", "\r\n");
+
       tb_Translation.Text = line.Translation.Text.Replace("\n", "\r\n");
     }
 
@@ -143,42 +164,51 @@ public partial class DialogEditor : Form
 
   void DisplayLines(List<Line> lines)
   {
+    static bool GetHasTrailingWhitespace(string s)
+    {
+      return s.TrimEnd() != s;
+    }
+
+    static bool GetHasError(Line line)
+    {
+      return line.Compose(out var error) is null || error is not null;
+    }
+
+    static bool GetIsUntranslated(Line line)
+    {
+      if (line.Translation.Skip || string.IsNullOrWhiteSpace(line.Text))
+        return false;
+
+      return string.IsNullOrWhiteSpace(line.Translation.Text);
+    }
+
+    static bool PassContains(string s, string value)
+    {
+      var sTrimmed = s.Trim();
+      var valueTrimmed = value.Trim();
+
+      return string.IsNullOrWhiteSpace(valueTrimmed) || sTrimmed.Contains(valueTrimmed, StringComparison.OrdinalIgnoreCase);
+    }
+
     lb_Lines.Items.Clear();
 
     // Add lines and filter.
     foreach (var line in lines)
     {
-      if (!string.IsNullOrEmpty(tb_SearchInNotes.Text) && !line.Translation.Notes.Contains(tb_SearchInNotes.Text))
+      if (PassContains(line.Translation.Notes, tb_SearchInNotes.Text) &&
+          PassContains(line.Text, tb_SearchInText.Text) &&
+          PassContains(line.Translation.Text, tb_SearchInTranslation.Text) &&
+          (!cb_FindTrailingWhitespace.Checked || GetHasTrailingWhitespace(line.Translation.Text)) &&
+          (!cb_FilterErrors.Checked || GetHasError(line)) &&
+          (!cb_FilterUntranslated.Checked || GetIsUntranslated(line)))
       {
-        continue;
+        lb_Lines.Items.Add(line);
       }
-      if (!string.IsNullOrEmpty(tb_SearchInText.Text) && !line.Text.Contains(tb_SearchInText.Text))
-      {
-        continue;
-      }
-      if (!string.IsNullOrEmpty(tb_SearchInTranslation.Text) && !line.Translation.Text.Contains(tb_SearchInTranslation.Text))
-      {
-        continue;
-      }
-      if (cb_FindTrailingWhitespace.Checked && !GetHasTrailingWhitespace(line.Translation.Text))
-      {
-        continue;
-      }
-      if (cb_FilterErrors.Checked && (line.Compose(out var error) != null || error == null))
-      {
-        continue;
-      }
-      if (cb_FilterUntranslated.Checked && (string.IsNullOrWhiteSpace(line.Text) || !string.IsNullOrEmpty(line.Translation.Text) || line.Translation.Skip))
-      {
-        continue;
-      }
-
-      lb_Lines.Items.Add(line);
     }
 
     // Select the first line and display the line count.
     lb_Lines.SelectedIndex = lb_Lines.Items.Count > 0 ? 0 : -1;
-    lbl_Lines.Text = "Lines (" + lb_Lines.Items.Count + " items)";
+    lbl_Lines.Text = $@"Lines ({lb_Lines.Items.Count} items)";
 
     DisplayLine(SelectedLine);
 
@@ -189,39 +219,11 @@ public partial class DialogEditor : Form
   {
     if (line is null)
     {
-      previewControl.Setup(true, 1, 1, "");
+      previewControl.Setup(true, 1, 1, string.Empty, false);
       return;
     }
 
-    var displayLines = line.Translation.Text
-      .Split('\n')
-      .ToList();
-    for (var i = 0; i < displayLines.Count; i++)
-    {
-      var displayLine = displayLines[i];
-
-      displayLine = displayLine.Replace("[Text Name]", cb_SixLetterNames.Checked ? "~NAME~" : "NAME");
-
-      while (displayLine.Contains('['))
-      {
-        var openIndex = displayLine.IndexOf('[');
-        var closeIndex = displayLine.IndexOf(']');
-        if (closeIndex == -1)
-        {
-          break;
-        }
-
-        var term = displayLine.Substring(openIndex, closeIndex - openIndex + 1);
-        if (term == "[Jumbo]")
-          displayLines.Insert(i + 1, string.Empty);
-
-        displayLine = displayLine.Remove(openIndex, closeIndex - openIndex + 1);
-      }
-
-      displayLines[i] = displayLine;
-    }
-
-    previewControl.Setup(reset, line.BoxHeight, line.BoxWidth, string.Join('\n', displayLines.ToArray()));
+    previewControl.Setup(reset, line.BoxHeight, line.BoxWidth, line.Translation.Text, cb_SixLetterNames.Checked);
 
     btn_PreviewUp.Enabled = previewControl.PageIndex > 0;
     btn_PreviewDown.Enabled = previewControl.PageIndex < previewControl.PageCount - 1;
@@ -246,10 +248,5 @@ public partial class DialogEditor : Form
         BlockSizes[block.Value] += bytes;
       }
     }
-  }
-
-  static bool GetHasTrailingWhitespace(string text)
-  {
-    return text.TrimEnd() != text;
   }
 }
