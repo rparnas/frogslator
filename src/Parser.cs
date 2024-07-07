@@ -432,8 +432,10 @@ public static class Parser
       var height = 2;
       var width = address >= 0x70F9B && address <= 0x7217A ? 16 : 18;
       var lastDatLocation = lines.Any() ? lines.Last().DialogAddressTableIndicies.Last() : -1;
+      var categories = LineCategories.Dialog;
+      var comment = ResolveComment(address);
       var datLocations = ResolveDialogAddressLocations(address, lastDatLocation);
-      lines.Add(new Line(LineCategories.Dialog, null, address, datLocations, height, width, header.ToArray(), body.ToArray(), footer.ToArray(), Compose, Parse));
+      lines.Add(new Line(categories, comment, address, datLocations, height, width, header.ToArray(), body.ToArray(), footer.ToArray(), Compose, Parse));
     }
 
     return lines;
@@ -685,6 +687,47 @@ public static class Parser
                        $@"'{c}'";
 
     return $"invalid {nameof(LatinTitleScreen)} character {characterStr}";
+  }
+
+  static string? ResolveComment(int address)
+  {
+    return address switch
+    {
+      0x70F9B => "Diary (1)",
+      0x7102C => "Diary (2)",
+      0x710C5 => "Diary (3)",
+      0x71154 => "Diary (4)",
+      0x711E7 => "Diary (5)",
+      0x71276 => "Diary (6)",
+      0x71301 => "Diary (7)",
+      0x7138C => "Diary (8)",
+      0x71413 => "Diary (9)",
+      0x714A8 => "Diary (10)",
+      0x71537 => "Diary (11)",
+      0x715C0 => "Diary (12)",
+      0x71653 => "Diary (13)",
+      0x716D9 => "Diary (14)",
+      0x71768 => "Diary (15)",
+      0x717FB => "Diary (16)",
+      0x7188E => "Diary (17)",
+      0x7191B => "Diary (18)",
+      0x719AA => "Diary (19)",
+      0x71A3D => "Diary (20)",
+      0x71ACE => "Diary (21)",
+      0x71B5F => "Diary (22)",
+      0x71BE8 => "Diary (23)",
+      0x71C73 => "Diary (24)",
+      0x71D08 => "Diary (25)",
+      0x71D9D => "Diary (26)",
+      0x71E2A => "Diary (27)",
+      0x71EBF => "Diary (28)",
+      0x71F48 => "Diary (29)",
+      0x71FCF => "Diary (30)",
+      0x7205E => "Diary (31)",
+      0x720E9 => "Diary (32)",
+      0x7217A => "Diary (33)",
+      _ => null,
+    };
   }
 
   static int[] ResolveDialogAddressLocations(int address, int lastDAT)

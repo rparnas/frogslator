@@ -129,10 +129,15 @@ public partial class GraphicsControl : UserControl
         {
           displayLines.Insert(i + 1, string.Empty);
         }
-        if (term == "[Text Space For Icon]")
+        else if (term == "[Text Space For Icon]")
         {
           var spaceForIcon = "    ";
           displayLine = spaceForIcon + displayLine;
+        }
+        else if (term == "[Text Nuts]" ||
+                 term == "[Text Spent]")
+        {
+          displayLine = displayLine.Insert(openIndex, "xxxxxxx");
         }
       }
 
