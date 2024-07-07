@@ -54,7 +54,7 @@ public partial class DialogEditor : Form
       btn_PreviewUp.Enabled = previewControl.PageIndex > 0;
     };
 
-    foreach (var cb in new[] { cb_FilterErrors, cb_FilterUntranslated, cb_FindTrailingWhitespace })
+    foreach (var cb in new[] { cb_FilterErrors, cb_FilterUntranslated })
       cb.CheckedChanged += (s, e) => DisplayLines(lines);
 
     cb_SixLetterNames.CheckedChanged += (s, e) => DisplayPreview(false, SelectedLine);
@@ -164,11 +164,6 @@ public partial class DialogEditor : Form
 
   void DisplayLines(List<Line> lines)
   {
-    static bool GetHasTrailingWhitespace(string s)
-    {
-      return s.TrimEnd() != s;
-    }
-
     static bool GetHasError(Line line)
     {
       return line.Compose(out var error) is null || error is not null;
@@ -198,7 +193,6 @@ public partial class DialogEditor : Form
       if (PassContains(line.Translation.Notes, tb_SearchInNotes.Text) &&
           PassContains(line.Text, tb_SearchInText.Text) &&
           PassContains(line.Translation.Text, tb_SearchInTranslation.Text) &&
-          (!cb_FindTrailingWhitespace.Checked || GetHasTrailingWhitespace(line.Translation.Text)) &&
           (!cb_FilterErrors.Checked || GetHasError(line)) &&
           (!cb_FilterUntranslated.Checked || GetIsUntranslated(line)))
       {

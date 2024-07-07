@@ -55,7 +55,6 @@ namespace Frogslator
       label1 = new Label();
       tb_SearchInTranslation = new TextBox();
       gb_Footer = new GroupBox();
-      cb_FindTrailingWhitespace = new CheckBox();
       label2 = new Label();
       tb_SearchInNotes = new TextBox();
       cb_FilterUntranslated = new CheckBox();
@@ -377,7 +376,6 @@ namespace Frogslator
       // gb_Footer
       // 
       gb_Footer.Anchor = AnchorStyles.Bottom | AnchorStyles.Left | AnchorStyles.Right;
-      gb_Footer.Controls.Add(cb_FindTrailingWhitespace);
       gb_Footer.Controls.Add(label2);
       gb_Footer.Controls.Add(tb_SearchInNotes);
       gb_Footer.Controls.Add(cb_FilterUntranslated);
@@ -396,18 +394,6 @@ namespace Frogslator
       gb_Footer.Size = new Size(980, 81);
       gb_Footer.TabIndex = 13;
       gb_Footer.TabStop = false;
-      // 
-      // cb_FindTrailingWhitespace
-      // 
-      cb_FindTrailingWhitespace.Anchor = AnchorStyles.Bottom | AnchorStyles.Left;
-      cb_FindTrailingWhitespace.AutoSize = true;
-      cb_FindTrailingWhitespace.Location = new Point(786, 58);
-      cb_FindTrailingWhitespace.Margin = new Padding(4, 3, 4, 3);
-      cb_FindTrailingWhitespace.Name = "cb_FindTrailingWhitespace";
-      cb_FindTrailingWhitespace.Size = new Size(154, 19);
-      cb_FindTrailingWhitespace.TabIndex = 17;
-      cb_FindTrailingWhitespace.Text = "Find Trailing Whitespace";
-      cb_FindTrailingWhitespace.UseVisualStyleBackColor = true;
       // 
       // label2
       // 
@@ -525,7 +511,6 @@ namespace Frogslator
     private System.Windows.Forms.CheckBox cb_FilterErrors;
     private Label label2;
     private TextBox tb_SearchInNotes;
-    private CheckBox cb_FindTrailingWhitespace;
     private Label lbl_DAT;
     private ListBox lb_DAT;
   }
