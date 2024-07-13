@@ -28,7 +28,6 @@ namespace Frogslator
     /// </summary>
     private void InitializeComponent()
     {
-      label7 = new Label();
       lbl_UsefulGlyphs = new Label();
       tb_UsefulGlyphs = new TextBox();
       lbl_Block3Bytes = new Label();
@@ -55,7 +54,7 @@ namespace Frogslator
       label1 = new Label();
       tb_SearchInTranslation = new TextBox();
       gb_Footer = new GroupBox();
-      label2 = new Label();
+      lbl_SearchInNotes = new Label();
       tb_SearchInNotes = new TextBox();
       cb_FilterUntranslated = new CheckBox();
       cb_FilterErrors = new CheckBox();
@@ -63,13 +62,6 @@ namespace Frogslator
       gb_Line.SuspendLayout();
       gb_Footer.SuspendLayout();
       SuspendLayout();
-      // 
-      // label7
-      // 
-      label7.Location = new Point(0, 0);
-      label7.Name = "label7";
-      label7.Size = new Size(100, 23);
-      label7.TabIndex = 0;
       // 
       // lbl_UsefulGlyphs
       // 
@@ -376,7 +368,7 @@ namespace Frogslator
       // gb_Footer
       // 
       gb_Footer.Anchor = AnchorStyles.Bottom | AnchorStyles.Left | AnchorStyles.Right;
-      gb_Footer.Controls.Add(label2);
+      gb_Footer.Controls.Add(lbl_SearchInNotes);
       gb_Footer.Controls.Add(tb_SearchInNotes);
       gb_Footer.Controls.Add(cb_FilterUntranslated);
       gb_Footer.Controls.Add(cb_FilterErrors);
@@ -397,15 +389,15 @@ namespace Frogslator
       // 
       // label2
       // 
-      label2.Anchor = AnchorStyles.Bottom | AnchorStyles.Left;
-      label2.AutoSize = true;
-      label2.Font = new Font("Segoe UI", 9F);
-      label2.Location = new Point(599, 23);
-      label2.Margin = new Padding(4, 0, 4, 0);
-      label2.Name = "label2";
-      label2.Size = new Size(76, 15);
-      label2.TabIndex = 16;
-      label2.Text = "Search Notes";
+      lbl_SearchInNotes.Anchor = AnchorStyles.Bottom | AnchorStyles.Left;
+      lbl_SearchInNotes.AutoSize = true;
+      lbl_SearchInNotes.Font = new Font("Segoe UI", 9F);
+      lbl_SearchInNotes.Location = new Point(599, 23);
+      lbl_SearchInNotes.Margin = new Padding(4, 0, 4, 0);
+      lbl_SearchInNotes.Name = "label2";
+      lbl_SearchInNotes.Size = new Size(76, 15);
+      lbl_SearchInNotes.TabIndex = 16;
+      lbl_SearchInNotes.Text = "Search Notes";
       // 
       // tb_SearchInNotes
       // 
@@ -467,7 +459,7 @@ namespace Frogslator
       Controls.Add(lb_Lines);
       Controls.Add(lbl_Lines);
       Margin = new Padding(4, 3, 4, 3);
-      MaximizeBox = false;
+      MaximizeBox = true;
       MinimumSize = new Size(1024, 768);
       Name = "DialogEditor";
       SizeGripStyle = SizeGripStyle.Hide;
@@ -481,7 +473,6 @@ namespace Frogslator
     }
 
     #endregion
-    private System.Windows.Forms.Label label7;
     private System.Windows.Forms.Label lbl_UsefulGlyphs;
     private System.Windows.Forms.TextBox tb_UsefulGlyphs;
     private System.Windows.Forms.Label lbl_Block3Bytes;
@@ -509,7 +500,7 @@ namespace Frogslator
     private System.Windows.Forms.CheckBox cb_SixLetterNames;
     private System.Windows.Forms.CheckBox cb_FilterUntranslated;
     private System.Windows.Forms.CheckBox cb_FilterErrors;
-    private Label label2;
+    private Label lbl_SearchInNotes;
     private TextBox tb_SearchInNotes;
     private Label lbl_DAT;
     private ListBox lb_DAT;

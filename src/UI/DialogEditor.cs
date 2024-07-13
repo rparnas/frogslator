@@ -1,4 +1,6 @@
-﻿namespace Frogslator;
+﻿using System.Text;
+
+namespace Frogslator;
 
 public partial class DialogEditor : Form
 {
@@ -188,6 +190,7 @@ public partial class DialogEditor : Form
     lb_Lines.Items.Clear();
 
     // Add lines and filter.
+    var asdf = new StringBuilder();
     foreach (var line in lines)
     {
       if (PassContains(line.Translation.Notes, tb_SearchInNotes.Text) &&
@@ -196,9 +199,10 @@ public partial class DialogEditor : Form
           (!cb_FilterErrors.Checked || GetHasError(line)) &&
           (!cb_FilterUntranslated.Checked || GetIsUntranslated(line)))
       {
-        lb_Lines.Items.Add(line);
+          lb_Lines.Items.Add(line);
       }
     }
+    var ret = asdf.ToString();
 
     // Select the first line and display the line count.
     lb_Lines.SelectedIndex = lb_Lines.Items.Count > 0 ? 0 : -1;

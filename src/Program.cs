@@ -5,8 +5,7 @@ namespace Frogslator;
 static class Program
 {
   public static readonly int MaxBlockSize = 0x4000;
-  public static readonly string BINFilter = "Binary File(*.bin)|*.bin";
-  public static readonly string ROMFilter = "GameBoy File(*.gb)|*.gb";
+  public static readonly string GBFilter = "GameBoy File(*.gb)|*.gb";
   public static readonly string FrogFilter = "Frog File (*.frog)|*.frog";
 
   public static List<GameBoyTile> FontBitmaps { get; private set; }
@@ -42,14 +41,16 @@ static class Program
 
   public static void ExtractTitleGraphicsFromROM()
   {
-    var address = Constants.Addresses.TitleGraphicsStart.ToString("X2");
-    var loadPath = DoFileDialog(new OpenFileDialog(), $@"Choose any Kaeru no Tame ni Kane Wa Naru ROM, original or modified, where the title is at 0x{address}", ROMFilter, LastPaths.LoadAltROM);
+    var block = Constants.Blocks.TitleGraphics;
+
+    var address = block.Start.ToString("X2");
+    var loadPath = DoFileDialog(new OpenFileDialog(), $@"Choose any Kaeru no Tame ni Kane Wa Naru ROM, original or modified, where the title is at 0x{address}", GBFilter, LastPaths.LoadAltROM);
     if (loadPath is null)
     {
       return;
     }
 
-    var savePath = DoFileDialog(new SaveFileDialog(), "Save title graphics binary", BINFilter, LastPaths.SaveBIN); 
+    var savePath = DoFileDialog(new SaveFileDialog(), "Save title graphics binary", GBFilter, LastPaths.SaveBIN); 
     if (savePath is null)
     {
       return;
@@ -57,10 +58,10 @@ static class Program
 
     var rom = File.ReadAllBytes(loadPath);
 
-    var bin = new byte[Constants.Lengths.TitleGraphics];
+    var bin = new byte[block.Length];
     for (var i = 0; i < bin.Length; i++)
     {
-      bin[i] = rom[i + Constants.Addresses.TitleGraphicsStart];
+      bin[i] = rom[i + block.Start];
     }
 
     File.WriteAllBytes(savePath, bin);
@@ -68,7 +69,7 @@ static class Program
 
   public static byte[]? LoadROMFromDisk()
   {
-    var path = DoFileDialog(new OpenFileDialog(), "Choose a valid Japanese Kaeru no Tame ni Kane Wa Naru ROM", ROMFilter, LastPaths.LoadROM);
+    var path = DoFileDialog(new OpenFileDialog(), "Choose a valid Japanese Kaeru no Tame ni Kane Wa Naru ROM", GBFilter, LastPaths.LoadROM);
     if (path is null)
     {
       return null;
@@ -160,7 +161,7 @@ static class Program
 
   public static void SaveROMToDisk(byte[] rom, List<Line> lines)
   {
-    var path = DoFileDialog(new SaveFileDialog(), "Save ROM", ROMFilter, LastPaths.SaveROM);
+    var path = DoFileDialog(new SaveFileDialog(), "Save ROM", GBFilter, LastPaths.SaveROM);
     if (path is null)
     {
       return;
@@ -206,16 +207,13 @@ static class Program
         }
 
         // Set references to this line in the DialogAddressTable
-        // 0 ~ 556 | 557 ~ 889 | 890 ~ 1621 | 1622 ~ 2332
-        var offset = (newAddress - newBlockOffset).ToString("x").ToUpper();
-        while (offset.Length < 4)
-        {
-          offset = "0" + offset;
-        }
+        var offset = newAddress - newBlockOffset;
+        var offsetBytes = Utils.GetBytes(offset, 2);
+        var datStart = Constants.Blocks.DialogAddressTable.Start;
         foreach (var datIndex in l.DialogAddressTableIndicies)
         {
-          newROM[(datIndex * 2) + 0x1CB2E    ] = byte.Parse(offset.Substring(2, 2), System.Globalization.NumberStyles.AllowHexSpecifier);
-          newROM[(datIndex * 2) + 0x1CB2E + 1] = byte.Parse(offset.Substring(0, 2), System.Globalization.NumberStyles.AllowHexSpecifier);
+          newROM[datStart + (datIndex * 2)]     = offsetBytes[1];
+          newROM[datStart + (datIndex * 2) + 1] = offsetBytes[0];
         }
       }
 
@@ -240,16 +238,10 @@ static class Program
     }
 
     // Change the title graphics.
-    for (int i = Constants.Addresses.TitleGraphicsStart; i < Constants.Addresses.TitleGraphicsStop; i++)
-    {
-      newROM[i] = Graphics_TitleScreen[i - Constants.Addresses.TitleGraphicsStart];
-    }
-
+    Array.Copy(Graphics_TitleScreen, 0, newROM, Constants.Blocks.TitleGraphics.Start, Constants.Blocks.TitleGraphics.Stop - Constants.Blocks.TitleGraphics.Start);
+    
     // Change the font graphics.
-    for (int i = Constants.Addresses.FontGraphicsStart; i < Constants.Addresses.FontGraphicsStop; i++)
-    {
-      newROM[i] = Graphics_Font[i - Constants.Addresses.FontGraphicsStart];
-    }
+    Array.Copy(Graphics_Font, 0, newROM, Constants.Blocks.FontGraphics.Start, Constants.Blocks.FontGraphics.Stop - Constants.Blocks.FontGraphics.Start); 
 
     // Dialog
     WriteDialog(0, 0x70000, 0x70000, out error);
@@ -356,8 +348,8 @@ static class Program
     Application.EnableVisualStyles();
     Application.SetCompatibleTextRenderingDefault(false);
 
-    var fontGraphics = LoadGraphics("Graphics_Font.bin", Constants.Lengths.FontGraphics);
-    var titleGraphics = LoadGraphics("Graphics_TitleScreen.bin", Constants.Lengths.TitleGraphics);
+    var fontGraphics = LoadGraphics("Graphics_Font.gb", Constants.Blocks.FontGraphics.Length);
+    var titleGraphics = LoadGraphics("Graphics_TitleScreen.gb", Constants.Blocks.TitleGraphics.Length);
     if (fontGraphics is null || titleGraphics is null)
     {
       return;
@@ -383,6 +375,7 @@ static class Program
       }
 
       var lines = Parser.GetLines(rom);
+      var asdf = string.Join("\r\n", lines.Select(x => $@"0x{x.Address:x2}").ToArray());
 
       LoadTranslationFromDisk(lastFrogPath, lines);
 

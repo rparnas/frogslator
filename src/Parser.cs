@@ -1,4 +1,5 @@
 ﻿using System.Globalization;
+using System.Security.Cryptography;
 using System.Text;
 
 namespace Frogslator;
@@ -93,7 +94,7 @@ public static class Parser
     /* 0x0_ */ ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ',
     /* 0x1_ */ ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ',
     /* 0x2_ */ ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ',
-    /* 0x3_ */ ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ',
+    /* 0x3_ */ ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', '…', '*',
     /* 0x4_ */ '~', '!', '?', '-', '.', ',', '\'','"', '▲', '▼', '◄', '►', ':', '‘', '“', ' ',
     /* 0x5_ */ 'A', 'B', 'C', 'D', 'E', 'F', 'G', 'H', 'I', 'J', 'K', 'L', 'M', 'N', 'O', 'P',
     /* 0x6_ */ 'Q', 'R', 'S', 'T', 'U', 'V', 'W', 'X', 'Y', 'Z', 'ß', 'Ä', 'Ö', 'Ü', 'a', 'b',
@@ -166,17 +167,6 @@ public static class Parser
     /* 0x518xx */ 'タ', 'ダ', 'ゲ', 'ッ', '！', '？', 'な', 'に', 'ー', 'っ', '許', 'せ', 'ん', 'ス', 'ポ', 'ア',
     /* 0x51Cxx */ '～', 'レ', 'Ｚ', '‥',  'ギ', 'ャ', 'ぐ', 'わ', '同', 'じ', '？', '？', 'ハ', '？', '？', 'ぁ'
   ]);
-
-  public static readonly HashSet<int> UnusedLines = new HashSet<int>
-  {
-    0x7274C,
-    0x72758,
-    0x72764,
-    0x72770,
-    0x7277C,
-    0x72788,
-    0x72794,
-  };
 
   public static List<Line> GetLines(byte[] rom)
   {
@@ -368,10 +358,48 @@ public static class Parser
       return ret.ToString();
     }
 
+    static Dictionary<int, int> ReadDAT(byte[] rom)
+    {
+      var ret = new Dictionary<int, int>();
+
+      var block = Constants.Blocks.DialogAddressTable;
+      var datIndex = 0;
+      for (var i = block.Start; i < block.Stop; i += 2)
+      {
+        var blockOffset = 
+          datIndex <  557 ? Constants.Blocks.Dialog0.Start :
+          datIndex <  890 ? Constants.Blocks.Dialog1.Start :
+          datIndex < 1622 ? Constants.Blocks.Dialog2.Start : 
+                         Constants.Blocks.Dialog3.Start;
+
+        var lowByte = rom[i];
+        var highByte = rom[i + 1];
+        var dialogAddress = ((highByte << 8) | lowByte) + blockOffset;
+
+        ret.Add(datIndex, dialogAddress);
+
+        datIndex++;
+      }
+
+      return ret;
+    }
+
+    static string? ResolveComment(int address)
+    {
+      if (Constants.Comments.TryGetValue(address, out var comment))
+      {
+        return string.IsNullOrWhiteSpace(comment) ? null : comment;
+      }
+
+      return "Unknown";
+    }
+
+    var dat = ReadDAT(rom);
+
     var lines = new List<Line>();
 
-    var index = 0x70000;
-    while (index < 0x80000)
+    var index = Constants.Blocks.Dialog.Start;
+    while (index < Constants.Blocks.Dialog.Stop)
     {
       if (rom[index] == 0xFF)
       {
@@ -389,7 +417,7 @@ public static class Parser
       index += 2;
 
       // Process the body and footer of the line.
-      while (index < 0x80000)
+      while (index < Constants.Blocks.Dialog.Stop)
       {
         if (new[] { 0xF1, 0xF5, 0xF6, 0xF8, 0xF9, 0xFA }.Contains(rom[index]))
         {
@@ -424,18 +452,21 @@ public static class Parser
           index++;
         }
       }
-      if (index == 0x80000)
+      if (index == Constants.Blocks.Dialog.Stop)
       {
         throw new NotImplementedException("Can't find body and footer of line.");
       }
 
+      var datLocations = dat
+        .Where(pair => pair.Value == address)
+        .Select(pair => pair.Key)
+        .ToArray();
+
       var height = 2;
-      var width = address >= 0x70F9B && address <= 0x7217A ? 16 : 18;
-      var lastDatLocation = lines.Any() ? lines.Last().DialogAddressTableIndicies.Last() : -1;
-      var categories = LineCategories.Dialog;
       var comment = ResolveComment(address);
-      var datLocations = ResolveDialogAddressLocations(address, lastDatLocation);
-      lines.Add(new Line(categories, comment, address, datLocations, height, width, header.ToArray(), body.ToArray(), footer.ToArray(), Compose, Parse));
+      var width = address >= 0x70F9B && address <= 0x7217A ? 16 : 18;
+      var category = LineCategories.Dialog;
+      lines.Add(new Line(category, comment, address, datLocations, height, width, header.ToArray(), body.ToArray(), footer.ToArray(), Compose, Parse));
     }
 
     return lines;
@@ -509,27 +540,27 @@ public static class Parser
       new Line(LineCategories.Diary, "Read (Left 3)",         0xE320, [], 1,  7, [], [], [], Compose, bytes => "       "),
       new Line(LineCategories.Diary, "Read (Left 4)",         0xE32E, [], 1,  7, [], [], [], Compose, bytes => "       "),
 
-      new Line(LineCategories.Diary, "Write (Left 1)",        0xE33C, [], 1, 7, [], [], [], Compose, bytes => " どの日記に "),
-      new Line(LineCategories.Diary, "Write (Left 2)",        0xE34A, [], 1, 7, [], [], [], Compose, bytes => "きろくする？ "),
-      new Line(LineCategories.Diary, "Write (Left 3)",        0xE358, [], 1, 7, [], [], [], Compose, bytes => "       "),
-      new Line(LineCategories.Diary, "Write (Left 4)",        0xE366, [], 1, 7, [], [], [], Compose, bytes => "       "),
-
-      new Line(LineCategories.Diary, "Keep Playing (Left 1)", 0xE374, [], 1, 7, [], [], [], Compose, bytes => "きろくしました"),
-      new Line(LineCategories.Diary, "Keep Playing (Left 2)", 0xE382, [], 1, 7, [], [], [], Compose, bytes => "       "),
-      new Line(LineCategories.Diary, "Keep Playing (Left 3)", 0xE390, [], 1, 7, [], [], [], Compose, bytes => "たびを    "),
-      new Line(LineCategories.Diary, "Keep Playing (Left 4)", 0xE39E, [], 1, 7, [], [], [], Compose, bytes => "つづけますか？"),
-
-      new Line(LineCategories.Diary, "Load (Right)",          0xE3AE, [], 1, 5, [], [], [], Compose, bytes => "日記けす "),
-                                                 
-      new Line(LineCategories.Diary, "In-Game (Right)",       0xE3BC, [], 1, 5, [], [], [], Compose, bytes => "もどる  "),
-      new Line(LineCategories.Diary, "In-Game (Right)",       0xE3CA, [], 1, 5, [], [], [], Compose, bytes => "日記つける"),
-      new Line(LineCategories.Diary, "In-Game (Right)",       0xE3E6, [], 1, 5, [], [], [], Compose, bytes => "日記たる "),
-
-      new Line(LineCategories.Diary, "Keep Playing (Right)", 0xE402, [], 1, 5, [], [], [], Compose, bytes => "YES  "),
-      new Line(LineCategories.Diary, "Keep Playing (Right)", 0xE41E, [], 1, 5, [], [], [], Compose, bytes => "NO   "),
-
-      new Line(LineCategories.Diary, "Write (Right)", 0xE43A, [], 1, 6, [], [], [], Compose, bytes => "____王子"),
-      new Line(LineCategories.Diary, "Write (Right)", 0xE456, [], 1, 6, [], [], [], Compose, bytes => "____王子"),
+      new Line(LineCategories.Diary, "Write (Left 1)",        0xE33C, [], 1,  7, [], [], [], Compose, bytes => " どの日記に "),
+      new Line(LineCategories.Diary, "Write (Left 2)",        0xE34A, [], 1,  7, [], [], [], Compose, bytes => "きろくする？ "),
+      new Line(LineCategories.Diary, "Write (Left 3)",        0xE358, [], 1,  7, [], [], [], Compose, bytes => "       "),
+      new Line(LineCategories.Diary, "Write (Left 4)",        0xE366, [], 1,  7, [], [], [], Compose, bytes => "       "),
+                                                                              
+      new Line(LineCategories.Diary, "Keep Playing (Left 1)", 0xE374, [], 1,  7, [], [], [], Compose, bytes => "きろくしました"),
+      new Line(LineCategories.Diary, "Keep Playing (Left 2)", 0xE382, [], 1,  7, [], [], [], Compose, bytes => "       "),
+      new Line(LineCategories.Diary, "Keep Playing (Left 3)", 0xE390, [], 1,  7, [], [], [], Compose, bytes => "たびを    "),
+      new Line(LineCategories.Diary, "Keep Playing (Left 4)", 0xE39E, [], 1,  7, [], [], [], Compose, bytes => "つづけますか？"),
+                                                                              
+      new Line(LineCategories.Diary, "Load (Right)",          0xE3AE, [], 1,  5, [], [], [], Compose, bytes => "日記けす "),
+                                                                              
+      new Line(LineCategories.Diary, "In-Game (Right)",       0xE3BC, [], 1,  5, [], [], [], Compose, bytes => "もどる  "),
+      new Line(LineCategories.Diary, "In-Game (Right)",       0xE3CA, [], 1,  5, [], [], [], Compose, bytes => "日記つける"),
+      new Line(LineCategories.Diary, "In-Game (Right)",       0xE3E6, [], 1,  5, [], [], [], Compose, bytes => "日記たる "),
+                                                                              
+      new Line(LineCategories.Diary, "Keep Playing (Right)",  0xE402, [], 1,  5, [], [], [], Compose, bytes => "YES  "),
+      new Line(LineCategories.Diary, "Keep Playing (Right)",  0xE41E, [], 1,  5, [], [], [], Compose, bytes => "NO   "),
+                                                                              
+      new Line(LineCategories.Diary, "Write (Right)",         0xE43A, [], 1,  6, [], [], [], Compose, bytes => "____王子"),
+      new Line(LineCategories.Diary, "Write (Right)",         0xE456, [], 1,  6, [], [], [], Compose, bytes => "____王子"),
     };
   }
 
@@ -651,10 +682,10 @@ public static class Parser
     {
       var physicalLines = new List<string>();
 
-      for (int physicalLineIndex = 0; physicalLineIndex < 3; physicalLineIndex++)
+      for (var physicalLineIndex = 0; physicalLineIndex < 3; physicalLineIndex++)
       {
         var physicalLine = new StringBuilder();
-        for (int i = 0; i < 0x10; i++)
+        for (var i = 0; i < 0x10; i++)
         {
           physicalLine.Append(ByteToChar(body[physicalLineIndex * 0x10 + i]));
         }
@@ -673,8 +704,7 @@ public static class Parser
       ret.Add(new Line(LineCategories.Title, "Opening", address, [], 3, 16, [], rom.Skip(address).Take(0x30).ToArray(), [], Compose, ParseOpening));
     }
 
-    ret.Add(new Line(LineCategories.Title, "Start", 0xB7A9, [], 1, 5, [], rom.Skip(0xB7A9).Take(0x05).ToArray(), [], Compose, ParseButton));
-
+    ret.Add(new Line(LineCategories.Title, "Start",    0xB7A9, [], 1, 5, [], rom.Skip(0xB7A9).Take(0x05).ToArray(), [], Compose, ParseButton));
     ret.Add(new Line(LineCategories.Title, "Continue", 0xB7AE, [], 1, 5, [], rom.Skip(0xB7AE).Take(0x05).ToArray(), [], Compose, ParseButton));
 
     return ret;
@@ -687,73 +717,6 @@ public static class Parser
                        $@"'{c}'";
 
     return $"invalid {nameof(LatinTitleScreen)} character {characterStr}";
-  }
-
-  static string? ResolveComment(int address)
-  {
-    return address switch
-    {
-      0x70F9B => "Diary (1)",
-      0x7102C => "Diary (2)",
-      0x710C5 => "Diary (3)",
-      0x71154 => "Diary (4)",
-      0x711E7 => "Diary (5)",
-      0x71276 => "Diary (6)",
-      0x71301 => "Diary (7)",
-      0x7138C => "Diary (8)",
-      0x71413 => "Diary (9)",
-      0x714A8 => "Diary (10)",
-      0x71537 => "Diary (11)",
-      0x715C0 => "Diary (12)",
-      0x71653 => "Diary (13)",
-      0x716D9 => "Diary (14)",
-      0x71768 => "Diary (15)",
-      0x717FB => "Diary (16)",
-      0x7188E => "Diary (17)",
-      0x7191B => "Diary (18)",
-      0x719AA => "Diary (19)",
-      0x71A3D => "Diary (20)",
-      0x71ACE => "Diary (21)",
-      0x71B5F => "Diary (22)",
-      0x71BE8 => "Diary (23)",
-      0x71C73 => "Diary (24)",
-      0x71D08 => "Diary (25)",
-      0x71D9D => "Diary (26)",
-      0x71E2A => "Diary (27)",
-      0x71EBF => "Diary (28)",
-      0x71F48 => "Diary (29)",
-      0x71FCF => "Diary (30)",
-      0x7205E => "Diary (31)",
-      0x720E9 => "Diary (32)",
-      0x7217A => "Diary (33)",
-      _ => null,
-    };
-  }
-
-  static int[] ResolveDialogAddressLocations(int address, int lastDAT)
-  {
-    // TODO: Would be better to just parse the DAT.
-    var repeats = new Dictionary<int, int>
-    {
-       { 0x723EA,   2 }, // 163  - 164  are repeats.
-       { 0x7240D,  12 }, // 165  - 176  are repeats.
-       { 0x727A0,   3 }, // 206  - 208  are repeats.
-       { 0x7286D,  11 }, // 214  - 224  are repeats.
-       { 0x729DD,   3 }, // 234  - 236  are repeats.
-       { 0x72A06,   2 }, // 237  - 238  are repeats.
-       { 0x72B6B,   3 }, // 252  - 254  are repeats.
-       { 0x736B4, 200 }, // 313  - 512  are repeats.
-       { 0x78119, 128 }, // 897  - 1024 are repeats.
-       { 0x79DD1,  93 }, // 1188 - 1280 are repeats.
-       { 0x7AE9C, 165 }, // 1372 - 1536 are repeats.
-       { 0x7C93E, 111 }, // 1682 - 1792 are repeats.
-       { 0x7E14B,  90 }, // 1959 - 2048 are repeats.
-       { 0x7F083, 176 }, // 2129 - 2304 are repeats.
-    };
-
-    var repeatCount = repeats.ContainsKey(address) ? repeats[address] : 1;
-    return Enumerable.Range(lastDAT + 1, repeatCount)
-      .ToArray();
   }
 
   enum CompositionModes

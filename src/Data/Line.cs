@@ -29,16 +29,30 @@ public class Line
   {
     get
     {
-      if (!DialogAddressTableIndicies.Any())
-        return null;
-
-      return DialogAddressTableIndicies.First() switch
+      if (Address < Constants.Blocks.Dialog0.Start)
       {
-        < 557  =>  0,
-        < 890  =>  1,
-        < 1622 =>  2,
-        _      =>  3,
-      };
+        return null;
+      }
+      else if (Address < Constants.Blocks.Dialog1.Start)
+      {
+        return 0;
+      }
+      else if (Address < Constants.Blocks.Dialog2.Start)
+      {
+        return 1;
+      }
+      else if (Address < Constants.Blocks.Dialog3.Start)
+      {
+        return 2;
+      }
+      else if (Address <= Constants.Blocks.Dialog3.Stop)
+      {
+        return 3;
+      }
+      else
+      {
+        throw new NotImplementedException();
+      }
     }
   }
 
