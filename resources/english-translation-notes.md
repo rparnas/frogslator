@@ -5,14 +5,15 @@ In 2008, I was spending a semester in Japan and talked with some students (in En
 
 Project goals and team roles developed over time. If I had to do it again, I would try to define them ahead of time. Loosely, the mission was "translate and localize the game as if it had been released professionally in the early 90s”. The project progressed as follows:
 
-* Hacking (14 months)
-* Initial Translation by Eien Ni Hen (8 months)
-* Hacking/Inserting Translated Text (5 months)
-* First Beta (1 month)
-* Processing Beta Feedback (4 months)
-* Text Overhaul with Brandon and Devin(3 months)
-* Second Beta (1 month)
-* Additional Text Iteration (3.3 months)
+* Hacking (14 months / Jun '08 ~ Jul '09)
+* Initial Translation by Eien Ni Hen (8 months / Aug '09 ~ Mar '10)
+* Hacking/Inserting Translated Text (5 months / Mar '10 to Jul '10)
+* First Beta (1 month / Aug '10)
+* Processing Beta Feedback (4 months / Sep '10 to Dec '10)
+* Text Overhaul with Brandon and Devin (3 months / Jan '11 to Mar '11)
+* Second Beta (1 month / Mar '10)
+* Additional Text Iteration (3 months / Apr '10 - Jun '11)
+* v1.0 Release (July 10th, 2011)
 
 My approach on the tech side was to keep things simple. No knowledge of ASM or program code was used. Mostly just the dialog data and a few graphics were edited. 
 
