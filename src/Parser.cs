@@ -1,5 +1,4 @@
 ﻿using System.Globalization;
-using System.Security.Cryptography;
 using System.Text;
 
 namespace Frogslator;
@@ -12,9 +11,11 @@ public static class Parser
     { [0xF2      ], "[Animation]"             },
     { [0xF3      ], "[Kana]"                  },
     { [0xF4      ], "[Kanji]"                 },
+
     { [0xF5, 0x00], "[Choice Yes/No]"         },
     { [0xF5, 0x01], "[Choice Number]"         },
     { [0xF5, 0x02], "[Choice Item]"           },
+
     { [0xF6, 0x00], "[Icon Wooden Shield]"    },
     { [0xF6, 0x01], "[Icon Leather Shield]"   },
     { [0xF6, 0x02], "[Icon Iron Shield]"      },
@@ -48,7 +49,9 @@ public static class Parser
     { [0xF6, 0x25], "[Icon Spade Key]"        },
     { [0xF6, 0x26], "[Icon Diamond Key]"      },
     { [0xF6, 0x27], "[Icon Club Key]"         },
+
     { [0xF7      ], "[Jumbo]"                 },
+
     { [0xF8, 0x01], "[BGM Fade]"              },
     { [0xF8, 0x06], "[BGM Defeat]"            },
     { [0xF8, 0x08], "[BGM Panic+Intro]"       },
@@ -62,6 +65,7 @@ public static class Parser
     { [0xF8, 0x21], "[BGM Flute]"             },
     { [0xF8, 0xFA], "[BGM Speech Off]"        },
     { [0xF8, 0xFF], "[BGM Off]"               },
+
     { [0xF9, 0x23], "[SFX Error]"             },
     { [0xF9, 0x24], "[SFX Pickup]"            },
     { [0xF9, 0x29], "[SFX Jump]"              },
@@ -76,6 +80,7 @@ public static class Parser
     { [0xF9, 0x67], "[SFX Stab]"              },
     { [0xF9, 0x6A], "[SFX Snore]"             },
     { [0xF9, 0x72], "[SFX Off]"               },
+
     { [0xFA, 0x01], "[Text Space For Icon]"   },
     { [0xFA, 0x02], "[Text Item Get]"         },
     { [0xFA, 0x04], "[Text Yes/No]"           },
@@ -83,6 +88,7 @@ public static class Parser
     { [0xFA, 0x80], "[Text Name]"             },
     { [0xFA, 0x81], "[Text Nuts]"             },
     { [0xFA, 0x82], "[Text Spent]"            },
+
     { [0xFC, null], "[Flag {0}]"              },
     { [0xFD      ], "\n"                      },
     { [0xFE      ], " "                       },
@@ -226,7 +232,8 @@ public static class Parser
           }
 
           // Express the control code.
-          var match = ControlCodes.Any(pair => pair.Value == controlCode) ? 
+          var match =
+            ControlCodes.Any(pair => pair.Value == controlCode) ? 
             ControlCodes.Single(pair => pair.Value == controlCode).Key : 
             null;
           if (controlCode.StartsWith("[Text Speed"))
@@ -370,7 +377,7 @@ public static class Parser
           datIndex <  557 ? Constants.Blocks.Dialog0.Start :
           datIndex <  890 ? Constants.Blocks.Dialog1.Start :
           datIndex < 1622 ? Constants.Blocks.Dialog2.Start : 
-                         Constants.Blocks.Dialog3.Start;
+                            Constants.Blocks.Dialog3.Start;
 
         var lowByte = rom[i];
         var highByte = rom[i + 1];

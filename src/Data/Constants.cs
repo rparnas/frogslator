@@ -16,6 +16,8 @@ internal static class Constants
     public static readonly Block Dialog3 = new Block(0x7C000, 0x80000);
   }
 
+  public const int GameboyGraphicsTileSize = 0x10;
+
   public static Dictionary<int, string> Comments = new Dictionary<int, string>
   {
     { 0x70000, ""},

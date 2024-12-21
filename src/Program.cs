@@ -94,7 +94,7 @@ static class Program
       return null;
     }
 
-    if (ret.Sum(b => b) != 77074606)
+    if (ret.Sum(b => b) != 0x49810AE)
     {
       error = "The Checksum of this ROM was not as expected. You must use the original Japanese version of the game.";
       return null;
@@ -117,31 +117,38 @@ static class Program
 
   public static void LoadTranslationFromDisk(string path, List<Line> lines)
   {
+    const string AddressPrefix = "Address: 0x";
+    const string TextPrefix = "Text: ";
+    const string NotePrefix = "Note: ";
+    const string SkipPrefix = "Skip: ";
+
     var ret = new List<Translation>();
-    var translation = (Translation)null;
-    var target = (Action<string>)null;
+    var translation = (Translation?)null;
+    var target = (Action<string>?)null;
 
     foreach (var line in File.ReadAllLines(path))
     {
-      if (line.StartsWith("Address: 0x"))
+      if (line.StartsWith(AddressPrefix))
       {
-        translation = new Translation(int.Parse(line.Substring("Address: 0x".Length), System.Globalization.NumberStyles.AllowHexSpecifier));
+        var address = int.Parse(line.Substring(AddressPrefix.Length), System.Globalization.NumberStyles.AllowHexSpecifier);
+
+        translation = new Translation(address);
         ret.Add(translation);
         target = null;
       }
-      else if (line.StartsWith("Text: "))
+      else if (line.StartsWith(TextPrefix))
       {
         target = s => translation.Text += s;
-        target(line.Substring("Text :".Length));
+        target(line.Substring(TextPrefix.Length));
       }
-      else if (line.StartsWith("Note: "))
+      else if (line.StartsWith(NotePrefix))
       {
         target = s => translation.Notes += s;
-        target(line.Substring("Note: ".Length));
+        target(line.Substring(NotePrefix.Length));
       }
-      else if (line.StartsWith("Skip: "))
+      else if (line.StartsWith(SkipPrefix))
       {
-        translation.Skip = line.Substring("Skip: ".Length) == "TRUE";
+        translation.Skip = line.Substring(SkipPrefix.Length) == "TRUE";
         target = null;
       }
       else
@@ -337,7 +344,7 @@ static class Program
 
       var ret = new List<GameBoyTile>();
 
-      for (var i = 0x0; i < Graphics_Font.Length; i += 0x10)
+      for (var i = 0; i < Graphics_Font.Length; i += Constants.GameboyGraphicsTileSize)
       {
         ret.Add(new GameBoyTile(Graphics_Font, i, palette, 4));
       }
