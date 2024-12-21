@@ -5,7 +5,7 @@ namespace Frogslator;
 
 public static class Parser
 {
-  public static readonly Dictionary<byte?[], string> ControlCodes = new Dictionary<byte?[], string>
+  public static readonly Dictionary<byte?[], string> ControlCodes = new()
   {
     { [0xF1, null], "[Text Speed {0}]"        },
     { [0xF2      ], "[Animation]"             },
@@ -94,7 +94,7 @@ public static class Parser
     { [0xFE      ], " "                       },
   };
 
-  public static readonly CharacterMap LatinDialog = new CharacterMap(
+  public static readonly CharacterMap LatinDialog = new(
   [
     /*          0    1    2    3    4    5    6    7    8    9    A    B    C    D    E    F */
     /* 0x0_ */ ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ',
@@ -110,7 +110,7 @@ public static class Parser
     /* 0xA_ */ ' ', ' ', ' ', ' ', ' ', ' ', '♥', '&', ' ', ' ', '(', ')', ' ', ' ', ' ', '_',
   ]);
 
-  public static readonly CharacterMap LatinNameScreen = new CharacterMap(
+  public static readonly CharacterMap LatinNameScreen = new(
   [
     /*          0    1    2    3    4    5    6    7    8    9    A    B    C    D    E    F */
     /* 0x0_ */ ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ',
@@ -123,7 +123,7 @@ public static class Parser
     /* 0x7_ */ '~', '!', '?', '-', '.', '‥', '♥', '&', ',', '.', '(', ')',
   ]);
 
-  public static readonly CharacterMap LatinTitleScreen = new CharacterMap(
+  public static readonly CharacterMap LatinTitleScreen = new(
   [
     /*          0    1    2    3    4    5    6    7    8    9    A    B    C    D    E    F */
     /* 0x0_ */ ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ',
@@ -136,14 +136,14 @@ public static class Parser
     /* 0x7_ */ 'ü', 'ô', 'ö', 'ç', 'î', '.', ','
   ]);
 
-  public static readonly CharacterMap LatinJumbo = new CharacterMap(
+  public static readonly CharacterMap LatinJumbo = new(
   [
     /*          0    1    2    3    4    5    6    7    8    9    A    B    C    D    E    F */
     /* 0x0_ */ 'H', 'W', ' ', ' ', 'Z', 'S', 'P', 'G', 'a', 'h', 't', 'o', 'y', 'e', ' ', ' ',
     /* 0x1_ */ ' ', 'm', 'p', ' ', '?', '!', ' ', ' ', '…', 'A', ' ', ' ', ' ', ' ', ' ', ' ',
   ]);
 
-  public static readonly CharacterMap Japanese = new CharacterMap(
+  public static readonly CharacterMap Japanese = new(
   [      
     /*             00    10    20    30   40    50    60    70    80   90    A0   B0    C0   D0    E0    F0 */
     /* 0x500__ */ 'あ', 'い', 'う', 'え', 'お', 'か', 'き', 'く', 'け', 'こ', 'さ', 'し', 'す', 'せ', 'そ', 'た',
@@ -168,7 +168,7 @@ public static class Parser
     /* 0x513__ */ '当', '湖', '内', '外', '海', '全', '主', '方', '向', '字', '？', '記', '世', '宝', '法', '口',
   ]);
 
-  public static readonly CharacterMap JapaneseJumbo = new CharacterMap(
+  public static readonly CharacterMap JapaneseJumbo = new(
   [
     /* 0x518xx */ 'タ', 'ダ', 'ゲ', 'ッ', '！', '？', 'な', 'に', 'ー', 'っ', '許', 'せ', 'ん', 'ス', 'ポ', 'ア',
     /* 0x51Cxx */ '～', 'レ', 'Ｚ', '‥',  'ギ', 'ャ', 'ぐ', 'わ', '同', 'じ', '？', '？', 'ハ', '？', '？', 'ぁ'
@@ -522,52 +522,52 @@ public static class Parser
 
     return new List<Line>
     {
-      new Line(LineCategories.Diary, "Load (Top)",            0xE208, [], 1, 14, [], [], [], Compose, bytes => "    日記ちょう     "),
+      new(LineCategories.Diary, "Load (Top)",            0xE208, [], 1, 14, [], [], [], Compose, bytes => "    日記ちょう     "),
                                                  
-      new Line(LineCategories.Diary, "In-Game (Top 1)",       0xE22E, [], 1,  3, [], [], [], Compose, bytes => "王子 "),
-      new Line(LineCategories.Diary, "In-Game (Top 2)",       0xE234, [], 1,  6, [], [], [], Compose, bytes => "日記ちょう "),
+      new(LineCategories.Diary, "In-Game (Top 1)",       0xE22E, [], 1,  3, [], [], [], Compose, bytes => "王子 "),
+      new(LineCategories.Diary, "In-Game (Top 2)",       0xE234, [], 1,  6, [], [], [], Compose, bytes => "日記ちょう "),
                                             
-      new Line(LineCategories.Diary, "Load (Left 1)",         0xE240, [], 1,  7, [], [], [], Compose, bytes => " どの日記で "),
-      new Line(LineCategories.Diary, "Load (Left 2)",         0xE24E, [], 1,  7, [], [], [], Compose, bytes => "はじめますか？ "),
-      new Line(LineCategories.Diary, "Load (Left 3)",         0xE25C, [], 1,  7, [], [], [], Compose, bytes => "       "),
-      new Line(LineCategories.Diary, "Load (Left 4)",         0xE26A, [], 1,  7, [], [], [], Compose, bytes => "       "),
+      new(LineCategories.Diary, "Load (Left 1)",         0xE240, [], 1,  7, [], [], [], Compose, bytes => " どの日記で "),
+      new(LineCategories.Diary, "Load (Left 2)",         0xE24E, [], 1,  7, [], [], [], Compose, bytes => "はじめますか？ "),
+      new(LineCategories.Diary, "Load (Left 3)",         0xE25C, [], 1,  7, [], [], [], Compose, bytes => "       "),
+      new(LineCategories.Diary, "Load (Left 4)",         0xE26A, [], 1,  7, [], [], [], Compose, bytes => "       "),
       
-      new Line(LineCategories.Diary, "Erase (Left 1)",        0xE278, [], 1,  7, [], [], [], Compose, bytes => " どの日記で "),
-      new Line(LineCategories.Diary, "Erase (Left 2)",        0xE286, [], 1,  7, [], [], [], Compose, bytes => "けしますか？ "),
-      new Line(LineCategories.Diary, "Erase (Left 3)",        0xE294, [], 1,  7, [], [], [], Compose, bytes => "       "),
-      new Line(LineCategories.Diary, "Erase (Left 4)",        0xE2A2, [], 1,  7, [], [], [], Compose, bytes => "       "),
+      new(LineCategories.Diary, "Erase (Left 1)",        0xE278, [], 1,  7, [], [], [], Compose, bytes => " どの日記で "),
+      new(LineCategories.Diary, "Erase (Left 2)",        0xE286, [], 1,  7, [], [], [], Compose, bytes => "けしますか？ "),
+      new(LineCategories.Diary, "Erase (Left 3)",        0xE294, [], 1,  7, [], [], [], Compose, bytes => "       "),
+      new(LineCategories.Diary, "Erase (Left 4)",        0xE2A2, [], 1,  7, [], [], [], Compose, bytes => "       "),
 
-      new Line(LineCategories.Diary, "In-Game (Left 1)",      0xE2B0, [], 1,  7, [], [], [], Compose, bytes => "どうしますか？"),
-      new Line(LineCategories.Diary, "In-Game (Left 2)",      0xE2BE, [], 1,  7, [], [], [], Compose, bytes => "       "),
-      new Line(LineCategories.Diary, "In-Game (Left 3)",      0xE2CC, [], 1,  7, [], [], [], Compose, bytes => "       "),
-      new Line(LineCategories.Diary, "In-Game (Left 4)",      0xE2DA, [], 1,  7, [], [], [], Compose, bytes => "       "),
+      new(LineCategories.Diary, "In-Game (Left 1)",      0xE2B0, [], 1,  7, [], [], [], Compose, bytes => "どうしますか？"),
+      new(LineCategories.Diary, "In-Game (Left 2)",      0xE2BE, [], 1,  7, [], [], [], Compose, bytes => "       "),
+      new(LineCategories.Diary, "In-Game (Left 3)",      0xE2CC, [], 1,  7, [], [], [], Compose, bytes => "       "),
+      new(LineCategories.Diary, "In-Game (Left 4)",      0xE2DA, [], 1,  7, [], [], [], Compose, bytes => "       "),
 
-      new Line(LineCategories.Diary, "Read (Left 1)",         0xE304, [], 1,  7, [], [], [], Compose, bytes => "どのぺーじから"),
-      new Line(LineCategories.Diary, "Read (Left 2)",         0xE312, [], 1,  7, [], [], [], Compose, bytes => "よみますか？ "),
-      new Line(LineCategories.Diary, "Read (Left 3)",         0xE320, [], 1,  7, [], [], [], Compose, bytes => "       "),
-      new Line(LineCategories.Diary, "Read (Left 4)",         0xE32E, [], 1,  7, [], [], [], Compose, bytes => "       "),
+      new(LineCategories.Diary, "Read (Left 1)",         0xE304, [], 1,  7, [], [], [], Compose, bytes => "どのぺーじから"),
+      new(LineCategories.Diary, "Read (Left 2)",         0xE312, [], 1,  7, [], [], [], Compose, bytes => "よみますか？ "),
+      new(LineCategories.Diary, "Read (Left 3)",         0xE320, [], 1,  7, [], [], [], Compose, bytes => "       "),
+      new(LineCategories.Diary, "Read (Left 4)",         0xE32E, [], 1,  7, [], [], [], Compose, bytes => "       "),
 
-      new Line(LineCategories.Diary, "Write (Left 1)",        0xE33C, [], 1,  7, [], [], [], Compose, bytes => " どの日記に "),
-      new Line(LineCategories.Diary, "Write (Left 2)",        0xE34A, [], 1,  7, [], [], [], Compose, bytes => "きろくする？ "),
-      new Line(LineCategories.Diary, "Write (Left 3)",        0xE358, [], 1,  7, [], [], [], Compose, bytes => "       "),
-      new Line(LineCategories.Diary, "Write (Left 4)",        0xE366, [], 1,  7, [], [], [], Compose, bytes => "       "),
-                                                                              
-      new Line(LineCategories.Diary, "Keep Playing (Left 1)", 0xE374, [], 1,  7, [], [], [], Compose, bytes => "きろくしました"),
-      new Line(LineCategories.Diary, "Keep Playing (Left 2)", 0xE382, [], 1,  7, [], [], [], Compose, bytes => "       "),
-      new Line(LineCategories.Diary, "Keep Playing (Left 3)", 0xE390, [], 1,  7, [], [], [], Compose, bytes => "たびを    "),
-      new Line(LineCategories.Diary, "Keep Playing (Left 4)", 0xE39E, [], 1,  7, [], [], [], Compose, bytes => "つづけますか？"),
-                                                                              
-      new Line(LineCategories.Diary, "Load (Right)",          0xE3AE, [], 1,  5, [], [], [], Compose, bytes => "日記けす "),
-                                                                              
-      new Line(LineCategories.Diary, "In-Game (Right)",       0xE3BC, [], 1,  5, [], [], [], Compose, bytes => "もどる  "),
-      new Line(LineCategories.Diary, "In-Game (Right)",       0xE3CA, [], 1,  5, [], [], [], Compose, bytes => "日記つける"),
-      new Line(LineCategories.Diary, "In-Game (Right)",       0xE3E6, [], 1,  5, [], [], [], Compose, bytes => "日記たる "),
-                                                                              
-      new Line(LineCategories.Diary, "Keep Playing (Right)",  0xE402, [], 1,  5, [], [], [], Compose, bytes => "YES  "),
-      new Line(LineCategories.Diary, "Keep Playing (Right)",  0xE41E, [], 1,  5, [], [], [], Compose, bytes => "NO   "),
-                                                                              
-      new Line(LineCategories.Diary, "Write (Right)",         0xE43A, [], 1,  6, [], [], [], Compose, bytes => "____王子"),
-      new Line(LineCategories.Diary, "Write (Right)",         0xE456, [], 1,  6, [], [], [], Compose, bytes => "____王子"),
+      new(LineCategories.Diary, "Write (Left 1)",        0xE33C, [], 1,  7, [], [], [], Compose, bytes => " どの日記に "),
+      new(LineCategories.Diary, "Write (Left 2)",        0xE34A, [], 1,  7, [], [], [], Compose, bytes => "きろくする？ "),
+      new(LineCategories.Diary, "Write (Left 3)",        0xE358, [], 1,  7, [], [], [], Compose, bytes => "       "),
+      new(LineCategories.Diary, "Write (Left 4)",        0xE366, [], 1,  7, [], [], [], Compose, bytes => "       "),
+                                                                         
+      new(LineCategories.Diary, "Keep Playing (Left 1)", 0xE374, [], 1,  7, [], [], [], Compose, bytes => "きろくしました"),
+      new(LineCategories.Diary, "Keep Playing (Left 2)", 0xE382, [], 1,  7, [], [], [], Compose, bytes => "       "),
+      new(LineCategories.Diary, "Keep Playing (Left 3)", 0xE390, [], 1,  7, [], [], [], Compose, bytes => "たびを    "),
+      new(LineCategories.Diary, "Keep Playing (Left 4)", 0xE39E, [], 1,  7, [], [], [], Compose, bytes => "つづけますか？"),
+                                                                         
+      new(LineCategories.Diary, "Load (Right)",          0xE3AE, [], 1,  5, [], [], [], Compose, bytes => "日記けす "),
+                                                                         
+      new(LineCategories.Diary, "In-Game (Right)",       0xE3BC, [], 1,  5, [], [], [], Compose, bytes => "もどる  "),
+      new(LineCategories.Diary, "In-Game (Right)",       0xE3CA, [], 1,  5, [], [], [], Compose, bytes => "日記つける"),
+      new(LineCategories.Diary, "In-Game (Right)",       0xE3E6, [], 1,  5, [], [], [], Compose, bytes => "日記たる "),
+                                                                         
+      new(LineCategories.Diary, "Keep Playing (Right)",  0xE402, [], 1,  5, [], [], [], Compose, bytes => "YES  "),
+      new(LineCategories.Diary, "Keep Playing (Right)",  0xE41E, [], 1,  5, [], [], [], Compose, bytes => "NO   "),
+                                                                         
+      new(LineCategories.Diary, "Write (Right)",         0xE43A, [], 1,  6, [], [], [], Compose, bytes => "____王子"),
+      new(LineCategories.Diary, "Write (Right)",         0xE456, [], 1,  6, [], [], [], Compose, bytes => "____王子"),
     };
   }
 
@@ -632,9 +632,9 @@ public static class Parser
       return ret.ToString();
     }
 
-    return new List<Line>
+    return new()
     {
-      new Line(LineCategories.Naming, null, 0x4F535, [], 1, 0x12, [], rom.Skip(0x4F535).Take(0x12).ToArray(), [], Compose, Parse)
+      new (LineCategories.Naming, null, 0x4F535, [], 1, 0x12, [], rom.Skip(0x4F535).Take(0x12).ToArray(), [], Compose, Parse)
     };
   }
 

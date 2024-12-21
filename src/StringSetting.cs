@@ -13,12 +13,12 @@ internal class StringSetting
 
   public string? Get()
   {
-    return (string?)Settings.Default[PropertyName];
+    return (string?)Settings[PropertyName];
   }
 
   public void Set(string value)
   {
-    Settings.Default[PropertyName] = value;
-    Settings.Default.Save();
+    Settings[PropertyName] = value;
+    Settings.Save();
   }
 }

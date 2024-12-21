@@ -8,36 +8,9 @@ static class Program
   public static readonly string GBFilter = "GameBoy File(*.gb)|*.gb";
   public static readonly string FrogFilter = "Frog File (*.frog)|*.frog";
 
-  public static List<GameBoyTile> FontBitmaps { get; private set; }
-  public static byte[] Graphics_TitleScreen { get; private set; }
-  public static byte[] Graphics_Font { get; private set; }
-
-  static string? DoFileDialog(FileDialog fd, string title, string filter, StringSetting lastPath)
-  {
-    var path = lastPath.Get();
-    
-    if (!string.IsNullOrWhiteSpace(path))
-    {
-      var dir = new FileInfo(path).Directory;
-      if (dir is not null && dir.Exists)
-      {
-        fd.InitialDirectory = dir.FullName;
-      }
-    }
-
-    fd.Title = title;
-    
-    fd.Filter = filter;
-
-    if (fd.ShowDialog() != DialogResult.OK)
-    {
-      return null;
-    }
-
-    lastPath.Set(fd.FileName);
-
-    return fd.FileName;
-  }
+  public static List<GameBoyTile> FontBitmaps { get; private set; } = null!;
+  public static byte[] NewGraphics_TitleScreen { get; private set; } = null!;
+  public static byte[] NewGraphics_Font { get; private set; } = null!;
 
   public static void ExtractTitleGraphicsFromROM()
   {
@@ -136,6 +109,10 @@ static class Program
         ret.Add(translation);
         target = null;
       }
+      else if (translation is null)
+      {
+        throw new Exception("Invalid translation format");
+      }
       else if (line.StartsWith(TextPrefix))
       {
         target = s => translation.Text += s;
@@ -150,6 +127,10 @@ static class Program
       {
         translation.Skip = line.Substring(SkipPrefix.Length) == "TRUE";
         target = null;
+      }
+      else if (target is null)
+      {
+        throw new Exception("Invalid translation format");
       }
       else
       {
@@ -245,10 +226,10 @@ static class Program
     }
 
     // Change the title graphics.
-    Array.Copy(Graphics_TitleScreen, 0, newROM, Constants.Blocks.TitleGraphics.Start, Constants.Blocks.TitleGraphics.Stop - Constants.Blocks.TitleGraphics.Start);
+    Array.Copy(NewGraphics_TitleScreen, 0, newROM, Constants.Blocks.TitleGraphics.Start, Constants.Blocks.TitleGraphics.Stop - Constants.Blocks.TitleGraphics.Start);
     
     // Change the font graphics.
-    Array.Copy(Graphics_Font, 0, newROM, Constants.Blocks.FontGraphics.Start, Constants.Blocks.FontGraphics.Stop - Constants.Blocks.FontGraphics.Start); 
+    Array.Copy(NewGraphics_Font, 0, newROM, Constants.Blocks.FontGraphics.Start, Constants.Blocks.FontGraphics.Stop - Constants.Blocks.FontGraphics.Start); 
 
     // Dialog
     WriteDialog(0, 0x70000, 0x70000, out error);
@@ -319,52 +300,19 @@ static class Program
   [STAThread]
   static void Main()
   {
-    static byte[]? LoadGraphics(string fileName, int requiredLength)
-    {
-      var filePath = Path.Combine("Graphics", fileName);
-      var bin = File.ReadAllBytes(filePath);
-      if (bin.Length != requiredLength)
-      {
-        MessageBox.Show($@"{filePath} must be exactly {requiredLength} bytes.");
-        return null;
-      }
-
-      return bin;
-    }
-
-    static List<GameBoyTile> MakeFontBitmaps(byte[] fontGraphics)
-    {
-      var palette = new[]
-      {
-            Color.FromArgb(255, 255, 255),
-            Color.FromArgb(168, 168, 168),
-            Color.FromArgb(96, 96, 96),
-            Color.FromArgb(0, 0, 0),
-      };
-
-      var ret = new List<GameBoyTile>();
-
-      for (var i = 0; i < Graphics_Font.Length; i += Constants.GameboyGraphicsTileSize)
-      {
-        ret.Add(new GameBoyTile(Graphics_Font, i, palette, 4));
-      }
-
-      return ret;
-    }
-
     Application.EnableVisualStyles();
     Application.SetCompatibleTextRenderingDefault(false);
 
-    var fontGraphics = LoadGraphics("Graphics_Font.gb", Constants.Blocks.FontGraphics.Length);
-    var titleGraphics = LoadGraphics("Graphics_TitleScreen.gb", Constants.Blocks.TitleGraphics.Length);
-    if (fontGraphics is null || titleGraphics is null)
+    var newGraphics_Font = LoadGraphics("Graphics_Font.gb", Constants.Blocks.FontGraphics.Length);
+    var newGraphicsTitleScreen = LoadGraphics("Graphics_TitleScreen.gb", Constants.Blocks.TitleGraphics.Length);
+    if (newGraphics_Font is null || newGraphicsTitleScreen is null)
     {
       return;
     }
 
-    Graphics_Font = fontGraphics;
-    Graphics_TitleScreen = titleGraphics;
-    FontBitmaps = MakeFontBitmaps(fontGraphics);
+    NewGraphics_Font = newGraphics_Font;
+    NewGraphics_TitleScreen = newGraphicsTitleScreen;
+    FontBitmaps = MakeFontBitmaps(newGraphics_Font);
 
     var lastROMPath = LastPaths.LoadROM.Get();
     var lastFrogPath = LastPaths.Frog.Get();
@@ -382,7 +330,6 @@ static class Program
       }
 
       var lines = Parser.GetLines(rom);
-      var asdf = string.Join("\r\n", lines.Select(x => $@"0x{x.Address:x2}").ToArray());
 
       LoadTranslationFromDisk(lastFrogPath, lines);
 
@@ -402,13 +349,73 @@ static class Program
     }
   }
 
+  static string? DoFileDialog(FileDialog fd, string title, string filter, StringSetting lastPath)
+  {
+    var path = lastPath.Get();
+
+    if (!string.IsNullOrWhiteSpace(path))
+    {
+      var dir = new FileInfo(path).Directory;
+      if (dir is not null && dir.Exists)
+      {
+        fd.InitialDirectory = dir.FullName;
+      }
+    }
+
+    fd.Title = title;
+
+    fd.Filter = filter;
+
+    if (fd.ShowDialog() != DialogResult.OK)
+    {
+      return null;
+    }
+
+    lastPath.Set(fd.FileName);
+
+    return fd.FileName;
+  }
+  
+  static byte[]? LoadGraphics(string fileName, int requiredLength)
+  {
+    var filePath = Path.Combine("Graphics", fileName);
+    var bin = File.ReadAllBytes(filePath);
+    if (bin.Length != requiredLength)
+    {
+      MessageBox.Show($@"{filePath} must be exactly {requiredLength} bytes.");
+      return null;
+    }
+
+    return bin;
+  }
+
+  static List<GameBoyTile> MakeFontBitmaps(byte[] fontGraphics)
+  {
+    var palette = new[]
+    {
+      Color.FromArgb(255, 255, 255),
+      Color.FromArgb(168, 168, 168),
+      Color.FromArgb(96, 96, 96),
+      Color.FromArgb(0, 0, 0),
+    };
+
+    var ret = new List<GameBoyTile>();
+
+    for (var i = 0; i < fontGraphics.Length; i += Constants.GameboyGraphicsTileSize)
+    {
+      ret.Add(new GameBoyTile(fontGraphics, i, palette));
+    }
+
+    return ret;
+  }
+
   public static class LastPaths
   {
-    public static StringSetting SaveBIN    = new StringSetting(Settings.Default, nameof(Settings.LastSaveBINPath));
-    public static StringSetting LoadAltROM = new StringSetting(Settings.Default, nameof(Settings.LastLoadAltROM));
+    public static StringSetting SaveBIN    = new(Settings.Default, nameof(Settings.LastSaveBINPath));
+    public static StringSetting LoadAltROM = new(Settings.Default, nameof(Settings.LastLoadAltROM));
 
-    public static StringSetting LoadROM = new StringSetting(Settings.Default, nameof(Settings.LastLoadROMPath));
-    public static StringSetting SaveROM = new StringSetting(Settings.Default, nameof(Settings.LastSaveROMPath));
-    public static StringSetting Frog    = new StringSetting(Settings.Default, nameof(Settings.LastFrogPath   ));
+    public static StringSetting LoadROM = new(Settings.Default, nameof(Settings.LastLoadROMPath));
+    public static StringSetting SaveROM = new(Settings.Default, nameof(Settings.LastSaveROMPath));
+    public static StringSetting Frog    = new(Settings.Default, nameof(Settings.LastFrogPath   ));
   }
 }

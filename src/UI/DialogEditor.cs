@@ -44,14 +44,14 @@ public partial class DialogEditor : Form
 
     btn_PreviewDown.Click += (s, e) =>
     {
-      previewControl.SetPage(previewControl.PageIndex + 1);
+      previewControl.SetPageIndex(previewControl.PageIndex + 1);
       btn_PreviewDown.Enabled = previewControl.PageIndex < previewControl.PageCount - 1;
       btn_PreviewUp.Enabled = previewControl.PageIndex > 0;
     };
 
     btn_PreviewUp.Click += (s, e) =>
     {
-      previewControl.SetPage(previewControl.PageIndex - 1);
+      previewControl.SetPageIndex(previewControl.PageIndex - 1);
       btn_PreviewDown.Enabled = previewControl.PageIndex < previewControl.PageCount - 1;
       btn_PreviewUp.Enabled = previewControl.PageIndex > 0;
     };
@@ -190,7 +190,6 @@ public partial class DialogEditor : Form
     lb_Lines.Items.Clear();
 
     // Add lines and filter.
-    var asdf = new StringBuilder();
     foreach (var line in lines)
     {
       if (PassContains(line.Translation.Notes, tb_SearchInNotes.Text) &&
@@ -202,7 +201,6 @@ public partial class DialogEditor : Form
           lb_Lines.Items.Add(line);
       }
     }
-    var ret = asdf.ToString();
 
     // Select the first line and display the line count.
     lb_Lines.SelectedIndex = lb_Lines.Items.Count > 0 ? 0 : -1;

@@ -8,7 +8,7 @@ public class GameBoyTile
   readonly byte[] Bytes;
   readonly byte[] Pixels;
 
-  public GameBoyTile(byte[] rom, int address, Color[] palette, int scale)
+  public GameBoyTile(byte[] rom, int address, Color[] palette)
   {
     Address = address;
     Bytes = new byte[16];

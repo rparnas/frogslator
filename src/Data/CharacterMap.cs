@@ -2,14 +2,14 @@
 
 public class CharacterMap
 {
-  char[] Map;
-  Dictionary<char, byte> CharToIndex;
+  readonly char[] Map;
+  readonly Dictionary<char, byte> CharToIndex;
 
   public CharacterMap(char[] map)
   {
     Map = map;
 
-    CharToIndex = new Dictionary<char, byte>();
+    CharToIndex = [];
     for (var i = 0; i < map.Length; i++)
     {
       CharToIndex[map[i]] = (byte)i; // the final occurance of repeated character will be used

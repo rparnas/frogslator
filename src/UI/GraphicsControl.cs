@@ -3,10 +3,12 @@ namespace Frogslator;
 public partial class GraphicsControl : UserControl
 {
   List<List<string>> Pages;
-  public int PageIndex { get; private set; }
+  int Index;
+  int Cols;
+  int Rows;
+
   public int PageCount => Pages.Count;
-  public int Cols { get; private set; }
-  public int Rows { get; private set; }
+  public int PageIndex => Index;
 
   public GraphicsControl()
   {
@@ -20,7 +22,7 @@ public partial class GraphicsControl : UserControl
         return;
       }
 
-      var page = Pages[PageIndex];
+      var page = Pages[Index];
       var qmIndex = Parser.LatinDialog.GetByte('?');
 
       for (var row = 0; row < Rows; row++)
@@ -38,13 +40,13 @@ public partial class GraphicsControl : UserControl
       }
     };
 
-    PageIndex = 0;
-    Pages = new List<List<string>> { new List<string> { string.Empty } };
+    Index = 0;
+    Pages = [[string.Empty]];
   }
 
-  public void SetPage(int pageIndex)
+  public void SetPageIndex(int pageIndex)
   {
-    PageIndex = pageIndex;
+    Index = pageIndex;
     Refresh();
   }
 
@@ -56,10 +58,10 @@ public partial class GraphicsControl : UserControl
     var newPageCount = newPages.Count;
 
     Cols = cols;
-    PageIndex = reset ? 0 : 
-                newPageCount != oldPageCount && PageIndex == oldPageCount - 1 ? newPageCount - 1 : 
-                PageIndex >= newPages.Count ? newPageCount -1 :
-                PageIndex;
+    Index = reset ? 0 : 
+                newPageCount != oldPageCount && Index == oldPageCount - 1 ? newPageCount - 1 : 
+                Index >= newPages.Count ? newPageCount -1 :
+                Index;
     Pages = newPages;
     Rows = rows;
     Size = new Size(32 * cols, 32 * rows);
@@ -69,13 +71,13 @@ public partial class GraphicsControl : UserControl
 
   static List<List<string>> PaginateText(int rows, int cols, string text)
   {
-    var pages = new List<List<string>> { new List<string> { string.Empty } };
+    var pages = new List<List<string>> { new() { string.Empty } };
 
     void newline()
     {
       if (pages.Last().Count == rows)
       {
-        pages.Add(new List<string> { string.Empty });
+        pages.Add([string.Empty]);
       }
       else
       {

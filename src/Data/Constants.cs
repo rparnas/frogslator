@@ -4,21 +4,21 @@ internal static class Constants
 {
   public static class Blocks
   {
-    public static readonly Block GameboyHeader      = new Block(0x00100, 0x00150);
-    public static readonly Block DialogAddressTable = new Block(0x1CB2E, 0x1DD68);
-    public static readonly Block TitleGraphics      = new Block(0x4D770, 0x4DD10);
-    public static readonly Block FontGraphics       = new Block(0x50000, 0x52000);
-    public static readonly Block Dialog             = new Block(0x70000, 0x80000);
+    public static readonly Block GameboyHeader      = new(0x00100, 0x00150);
+    public static readonly Block DialogAddressTable = new(0x1CB2E, 0x1DD68);
+    public static readonly Block TitleGraphics      = new(0x4D770, 0x4DD10);
+    public static readonly Block FontGraphics       = new(0x50000, 0x52000);
+    public static readonly Block Dialog             = new(0x70000, 0x80000);
 
-    public static readonly Block Dialog0 = new Block(0x70000, 0x74000);
-    public static readonly Block Dialog1 = new Block(0x74000, 0x78000);
-    public static readonly Block Dialog2 = new Block(0x78000, 0x7C000);
-    public static readonly Block Dialog3 = new Block(0x7C000, 0x80000);
+    public static readonly Block Dialog0 = new(0x70000, 0x74000);
+    public static readonly Block Dialog1 = new(0x74000, 0x78000);
+    public static readonly Block Dialog2 = new(0x78000, 0x7C000);
+    public static readonly Block Dialog3 = new(0x7C000, 0x80000);
   }
 
   public const int GameboyGraphicsTileSize = 0x10;
 
-  public static Dictionary<int, string> Comments = new Dictionary<int, string>
+  public static Dictionary<int, string> Comments = new()
   {
     { 0x70000, ""},
     { 0x70018, ""},
@@ -1370,8 +1370,8 @@ internal static class Constants
     { 0x7f69f, "News (29)"},
   };
 
-  public static readonly HashSet<int> UnusedDialog = new HashSet<int>
-  {
+  public static readonly HashSet<int> UnusedDialog =
+  [
     0x7274C,
     0x72758,
     0x72764,
@@ -1379,5 +1379,5 @@ internal static class Constants
     0x7277C,
     0x72788,
     0x72794,
-  };
+  ];
 }
